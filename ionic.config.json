@@ -1,0 +1,7 @@
+{
+  "name": "albumApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
