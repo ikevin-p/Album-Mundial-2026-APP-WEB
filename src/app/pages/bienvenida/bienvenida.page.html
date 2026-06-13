@@ -1,0 +1,96 @@
+<ion-content class="bienvenida-content" [fullscreen]="true">
+  <div class="bienvenida-wrap">
+
+    <div class="bg-estadio"></div>
+    <div class="bg-oscuro"></div>
+
+    <div class="franjas-izq">
+      <div class="f fi-verde"></div>
+      <div class="f fi-rojo"></div>
+      <div class="f fi-azul"></div>
+    </div>
+    <div class="franjas-der">
+      <div class="f fd-azul"></div>
+      <div class="f fd-verde"></div>
+      <div class="f fd-rojo"></div>
+    </div>
+
+    <!-- Sobres flotando izquierda -->
+    <div class="sobres-flotante">
+      <img src="assets/sobres.png" alt="Sobres Panini">
+    </div>
+
+    <!-- Balón flotando derecha -->
+    <div class="balon-flotante">
+      <img src="assets/balon.png" alt="Balón Trionda">
+    </div>
+
+    <div class="contenido">
+
+      <div class="hero-logo">
+        <img src="assets/logo-sinfondo.png" alt="FIFA World Cup 26" class="logo-img">
+      </div>
+
+      <div class="titulos">
+        <p class="wc-sup">FIFA WORLD CUP</p>
+        <div class="num-2026">
+          <span class="blanco">20</span><span class="rojo">2</span><span class="verde">6</span>
+        </div>
+        <p class="album-sub">ÁLBUM OFICIAL DE FIGURITAS</p>
+      </div>
+
+      <!-- Sedes: solo banderas y nombres, sin mapa -->
+      <div class="sedes-strip">
+        <div class="sede-item">
+          <img src="https://flagcdn.com/w80/mx.png" alt="México" class="sede-flag">
+          <span>MÉXICO</span>
+        </div>
+        <div class="sede-div"></div>
+        <div class="sede-item destacado">
+          <img src="https://flagcdn.com/w80/us.png" alt="EE.UU." class="sede-flag">
+          <span>EE. UU.</span>
+        </div>
+        <div class="sede-div"></div>
+        <div class="sede-item">
+          <img src="https://flagcdn.com/w80/ca.png" alt="Canadá" class="sede-flag">
+          <span>CANADÁ</span>
+        </div>
+      </div>
+
+      <!-- Estadísticas del torneo -->
+      <div class="stats-torneo">
+        <div class="stat-t">
+          <span class="stat-n">48</span>
+          <span class="stat-l">Selecciones</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-t">
+          <span class="stat-n">16</span>
+          <span class="stat-l">Estadios</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-t">
+          <span class="stat-n">3</span>
+          <span class="stat-l">Países</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-t">
+          <span class="stat-n">104</span>
+          <span class="stat-l">Partidos</span>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="btns-wrap">
+        <button class="btn-login"    (click)="irLogin()">INICIAR SESIÓN</button>
+        <button class="btn-registro" (click)="irRegistro()">Crear cuenta gratis</button>
+      </div>
+
+      <!-- Logo Panini oficial -->
+      <div class="panini-wrap">
+        <img src="assets/panini-logo.png" alt="Panini" class="panini-img">
+      </div>
+
+    </div>
+  </div>
+</ion-content>

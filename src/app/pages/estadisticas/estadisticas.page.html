@@ -1,0 +1,130 @@
+<ion-header class="stats-hdr">
+  <div class="hdr-franja-izq"><div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div></div>
+  <div class="hdr-franja-der"><div class="hf f4"></div><div class="hf f5"></div></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" class="hdr-btn">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <div class="hdr-titulo-wrap">
+      <span class="hdr-titulo">ESTADÍSTICAS</span>
+      <span class="hdr-sub">FIFA World Cup 2026 · Mi álbum</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="stats-content">
+  <div class="stats-inner">
+
+    <!-- PROGRESO GLOBAL -->
+    <div class="progreso-global">
+      <div class="pg-circulo">
+        <svg viewBox="0 0 120 120" class="pg-svg">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="10"/>
+          <circle cx="60" cy="60" r="52" fill="none"
+            stroke="url(#grad-prog)" stroke-width="10"
+            stroke-dasharray="326.7"
+            [attr.stroke-dashoffset]="326.7 - (326.7 * porcentajeGlobal / 100)"
+            stroke-linecap="round"
+            transform="rotate(-90 60 60)"/>
+          <defs>
+            <linearGradient id="grad-prog" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#FF4D6D"/>
+              <stop offset="50%"  stop-color="#29B6F6"/>
+              <stop offset="100%" stop-color="#00E676"/>
+            </linearGradient>
+          </defs>
+          <text x="60" y="56" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="22" fill="#fff">{{ porcentajeGlobal }}%</text>
+          <text x="60" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="rgba(255,255,255,0.45)">COMPLETADO</text>
+        </svg>
+      </div>
+      <div class="pg-info">
+        <p class="pg-titulo">Mi Álbum Mundial</p>
+        <p class="pg-sub">{{ totalTengo }} de {{ totalCatalogo }} láminas</p>
+        <div class="pg-barra-bg"><div class="pg-barra-fill" [style.width]="barraGlobal"></div></div>
+      </div>
+    </div>
+
+    <!-- STATS GRID 2×2 -->
+    <div class="stats-grid">
+      <div class="scard tengo">
+        <ion-icon name="football-outline"></ion-icon>
+        <span class="snum">{{ totalTengo }}</span>
+        <span class="slbl">Tengo</span>
+      </div>
+      <div class="scard faltan">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        <span class="snum">{{ totalFaltantes }}</span>
+        <span class="slbl">Me faltan</span>
+      </div>
+      <div class="scard cambio">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <span class="snum">{{ totalParaCambiar }}</span>
+        <span class="slbl">Para cambiar</span>
+      </div>
+      <div class="scard brillantes">
+        <ion-icon name="ribbon-outline"></ion-icon>
+        <span class="snum">{{ totalBrillantes }}</span>
+        <span class="slbl">Brillantes</span>
+      </div>
+    </div>
+
+    <!-- PROGRESO POR ZONA -->
+    <div class="seccion">
+      <h3 class="sec-titulo">Progreso por confederación</h3>
+      <div class="zona-lista">
+        <div class="zona-item" *ngFor="let z of zonas">
+          <div class="zona-hdr">
+            <span class="zona-nombre">{{ z.zona }}</span>
+            <span class="zona-pct" [style.color]="z.color">{{ z.pct }}%</span>
+          </div>
+          <div class="zona-barra-bg">
+            <div class="zona-barra-fill"
+                 [style.width]="z.pct + '%'"
+                 [style.background]="z.color">
+            </div>
+          </div>
+          <span class="zona-cnt">{{ z.tengo }} / {{ z.total }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP 5 MÁS COMPLETOS -->
+    <div class="seccion">
+      <h3 class="sec-titulo">Top 5 · Más completos</h3>
+      <div class="top-lista">
+        <div class="top-item" *ngFor="let p of topCompletos; let i = index">
+          <span class="top-pos" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+            {{ i + 1 }}
+          </span>
+          <img [src]="getFlagUrl(p.flagCode)" [alt]="p.nombre" class="top-flag"
+               onerror="this.style.display='none'">
+          <span class="top-nombre">{{ p.nombre }}</span>
+          <div class="top-barra-bg">
+            <div class="top-barra-fill" [style.width]="p.pct + '%'"
+                 [style.background]="p.pct === 100 ? '#FFC400' : '#00E676'"></div>
+          </div>
+          <span class="top-pct" [style.color]="p.pct === 100 ? '#FFC400' : '#00E676'">{{ p.pct }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP 5 MÁS REPETIDAS -->
+    <div class="seccion" *ngIf="topRepetidas.length > 0">
+      <h3 class="sec-titulo">Top 5 · Más repetidas para cambiar</h3>
+      <div class="top-lista">
+        <div class="top-item" *ngFor="let p of topRepetidas; let i = index">
+          <span class="top-pos" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+            {{ i + 1 }}
+          </span>
+          <img [src]="getFlagUrl(p.flagCode)" [alt]="p.nombre" class="top-flag"
+               onerror="this.style.display='none'">
+          <span class="top-nombre">{{ p.nombre }}</span>
+          <span class="rep-badge">x{{ p.rep }} repetidas</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

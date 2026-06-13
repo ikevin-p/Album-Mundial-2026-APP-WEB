@@ -1,0 +1,254 @@
+.registro-content { --background: #0A1628; }
+
+.registro-wrap {
+  position: relative; min-height: 100vh; overflow: hidden;
+  background: #0A1628;
+}
+
+.bg-grad {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(0,200,83,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(21,101,192,0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #0D1F3C 0%, #0A1628 50%, #071020 100%);
+}
+
+// Franjas laterales finas
+.franja-izq {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px; display: flex; flex-direction: column;
+  z-index: 1; pointer-events: none;
+}
+.franja-der {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 4px; display: flex; flex-direction: column;
+  z-index: 1; pointer-events: none;
+}
+.f { flex: 1; }
+.f1 { background: #00C853; }
+.f2 { background: #fff; opacity: .4; }
+.f3 { background: #E8003D; }
+.f4 { background: #1565C0; }
+.f5 { background: #00C853; opacity: .7; }
+
+// ── Contenido ──────────────────────────────────────────────────
+.contenido {
+  position: relative; z-index: 2;
+  max-width: 520px; margin: 0 auto;
+  padding: 16px 22px 36px;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+// ── Header: botón en esquina, logo + título centrado ───────────
+.page-header {
+  position: relative;
+  display: flex; align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  padding-top: 8px;
+  min-height: 80px;
+}
+
+// Botón volver — esquina superior izquierda, con texto "Volver"
+.back-btn {
+  position: absolute; left: 0; top: 8px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 7px 11px;
+  color: rgba(255,255,255,0.6); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: all .2s;
+  ion-icon { font-size: 16px; }
+  span { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.3px; }
+  &:hover { background: rgba(255,255,255,0.13); color: #fff; border-color: rgba(255,255,255,0.25); }
+  &:active { transform: scale(0.96); }
+}
+
+// Centro: logo grande + título centrado
+.header-center {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  text-align: center;
+}
+
+.mini-logo {
+  width: 110px; height: auto;       // más grande
+  mix-blend-mode: screen;
+  filter: brightness(1.15);
+}
+
+.header-txts {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+}
+
+.page-titulo {
+  font-family: 'Impact', 'Arial Black', sans-serif;
+  font-size: 1.7rem; font-weight: 900; color: #fff;  // más grande
+  letter-spacing: 1px; line-height: 1;
+}
+
+.page-sub {
+  font-size: 0.7rem; color: rgba(255,255,255,0.4); letter-spacing: 0.3px;
+}
+
+// ── Botón Google ───────────────────────────────────────────────
+.btn-google {
+  width: 100%; display: flex; align-items: center;
+  justify-content: center; gap: 10px;
+  background: #fff; border: none; border-radius: 12px;
+  padding: 13px 16px; cursor: pointer; margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  transition: box-shadow .2s, transform .15s;
+  position: relative;
+
+  .google-svg { display: flex; align-items: center; }
+
+  span:nth-child(2) {
+    font-family: 'Arial', sans-serif; font-size: 0.9rem;
+    font-weight: 600; color: #3C4043; flex: 1; text-align: center;
+  }
+
+  .rec-badge {
+    position: absolute; top: -8px; right: 12px;
+    background: #00C853; color: #fff; font-size: 0.52rem;
+    font-weight: 800; border-radius: 4px; padding: 2px 6px; letter-spacing: 0.5px;
+  }
+
+  &:hover  { box-shadow: 0 4px 16px rgba(0,0,0,0.4); transform: translateY(-1px); }
+  &:active { transform: scale(0.98); }
+}
+
+// ── Divider ────────────────────────────────────────────────────
+.divider {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  span { font-size: 0.65rem; color: rgba(255,255,255,0.28); white-space: nowrap; }
+}
+.div-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+// ── Formulario ─────────────────────────────────────────────────
+.form-wrap { flex: 1; }
+.form-grupo { margin-bottom: 14px; }
+
+.flabel {
+  display: block; font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: rgba(255,255,255,0.55); margin-bottom: 6px;
+  .opc { font-size: 0.58rem; font-weight: 400; color: rgba(255,255,255,0.25);
+         text-transform: none; letter-spacing: 0; }
+}
+
+.ibox {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+
+  &:focus-within {
+    border-color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.11);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+  }
+  &.iok  { border-color: #00C853; box-shadow: 0 0 0 3px rgba(0,200,83,0.1); }
+  &.ierr { border-color: #E8003D; box-shadow: 0 0 0 3px rgba(232,0,61,0.08); }
+
+  input {
+    flex: 1; background: transparent; border: none;
+    padding: 12px 8px 12px 0; color: #FFFFFF;
+    font-size: 0.95rem; outline: none;
+    &::placeholder { color: rgba(255,255,255,0.22); font-size: 0.85rem; }
+  }
+}
+
+.iico {
+  font-size: 16px; color: rgba(255,255,255,0.3);
+  margin: 0 8px 0 13px; flex-shrink: 0;
+}
+
+.ibadge {
+  font-size: 0.75rem; font-weight: 900; margin-right: 10px; flex-shrink: 0;
+  &.ok  { color: #00C853; }
+  &.err { color: #E8003D; }
+}
+
+.ojo {
+  background: transparent; border: none; cursor: pointer;
+  padding: 0 12px; display: flex; align-items: center;
+  ion-icon { font-size: 17px; color: rgba(255,255,255,0.3); }
+  &:hover ion-icon { color: rgba(255,255,255,0.65); }
+}
+
+// Dos columnas
+.cols-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  @media (max-width: 399px) { grid-template-columns: 1fr; }
+}
+
+// Fuerza contraseña
+.fuerza {
+  display: flex; align-items: center; gap: 8px; margin-top: 5px;
+  span { font-size: 0.6rem; font-weight: 700; white-space: nowrap; }
+}
+.f-bar  { flex: 1; height: 3px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+.f-fill { height: 100%; border-radius: 4px; transition: width .3s, background .3s; }
+
+// Términos
+.terminos {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; cursor: pointer; user-select: none;
+  font-size: 0.75rem; color: rgba(255,255,255,0.5);
+}
+.chk {
+  width: 20px; height: 20px; border-radius: 6px;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s;
+  &.on { background: #00C853; border-color: #00C853; ion-icon { font-size: 13px; color: #fff; } }
+}
+.link-v { color: #00C853; font-weight: 600; }
+
+// Mensajes
+.msg-err {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(232,0,61,0.12); border: 1px solid rgba(232,0,61,0.3);
+  border-radius: 10px; color: #ff8aaa; font-size: 0.77rem;
+  padding: 9px 13px; margin-bottom: 12px;
+  ion-icon { font-size: 15px; flex-shrink: 0; }
+}
+.msg-ok {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(0,200,83,0.1); border: 1px solid rgba(0,200,83,0.25);
+  border-radius: 10px; color: #69f0ae; font-size: 0.77rem;
+  padding: 9px 13px; margin-bottom: 12px;
+  ion-icon { font-size: 15px; flex-shrink: 0; }
+}
+
+// Botón crear
+.btn-crear {
+  width: 100%;
+  background: linear-gradient(90deg, #00A843 0%, #4CD964 50%, #00A843 100%);
+  background-size: 200% 100%; color: #fff;
+  font-family: 'Impact', 'Arial Black', sans-serif;
+  font-size: 0.95rem; font-weight: 900; letter-spacing: 1.5px;
+  border: none; border-radius: 12px; padding: 14px;
+  cursor: pointer; margin-bottom: 12px;
+  box-shadow: 0 4px 18px rgba(0,200,83,0.35);
+  transition: background-position .4s, transform .15s, opacity .2s;
+  display: flex; align-items: center; justify-content: center;
+  &:hover    { background-position: 100% 0; }
+  &:active   { transform: scale(0.97); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+  .spin { animation: girar .8s linear infinite; font-size: 20px; }
+}
+@keyframes girar { to { transform: rotate(360deg); } }
+
+.link-login {
+  text-align: center; font-size: 0.8rem;
+  color: rgba(255,255,255,0.38); margin: 0 0 20px;
+  span { color: #00C853; font-weight: 700; cursor: pointer; text-decoration: underline; }
+}
+
+// Panini
+.panini-wrap { display: flex; justify-content: center; padding-top: 4px; }
+.panini-img  { height: 46px; width: auto; border-radius: 4px; opacity: 0.9; }

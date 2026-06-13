@@ -1,0 +1,276 @@
+// usuarios-chat.page.scss — Centro de Mensajes e Intercambios FIFA 2026
+
+// ── HEADER ──────────────────────────────────────────────────────
+.chat-hdr {
+  position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6) !important;
+
+  &::before {
+    content: ''; position: absolute; inset: 0; z-index: 0;
+    background-image: url('/assets/wc2026-hero.jpg');
+    background-size: cover; background-position: center 35%;
+    opacity: 0.16; filter: saturate(1.2);
+  }
+
+  ion-toolbar {
+    --background: transparent; --color: #fff;
+    position: relative; z-index: 2;
+    background: linear-gradient(135deg, #071020 0%, #0A1628 60%, #0D1F3C 100%) !important;
+    padding: 4px 8px;
+  }
+}
+
+.hdr-franja-izq, .hdr-franja-der {
+  position: absolute; top: 0; bottom: 0; width: 5px;
+  display: flex; flex-direction: column; z-index: 3; pointer-events: none;
+}
+.hdr-franja-izq { left: 0; } .hdr-franja-der { right: 0; }
+.hf { flex: 1; }
+.f1 { background: #00C853; } .f2 { background: rgba(255,255,255,.5); } .f3 { background: #E8003D; }
+.f4 { background: #1565C0; } .f5 { background: #00C853; opacity: .8; }
+
+.hdr-titulo-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.hdr-titulo {
+  font-family: 'Impact','Arial Black',sans-serif;
+  font-size: 1.05rem; font-weight: 900; color: #fff;
+  letter-spacing: 2.5px; line-height: 1;
+}
+.hdr-sub { font-size: .55rem; color: rgba(255,255,255,.4); letter-spacing: 1px; text-transform: uppercase; }
+
+.hdr-btn {
+  --color: rgba(255,255,255,.65);
+  --background: rgba(255,255,255,.07);
+  --border-radius: 10px;
+}
+.bot-btn { --color: #F5C842 !important; }
+
+// ── CONTENT ─────────────────────────────────────────────────────
+.chat-list-content { --background: #0A1322; }
+
+.page-inner {
+  max-width: 760px; margin: 0 auto;
+  padding: 8px 14px 40px;
+}
+
+// ── Buscador ────────────────────────────────────────────────────
+.buscador-wrap { padding: 8px 0 4px; }
+.buscador {
+  --background: rgba(255,255,255,.05);
+  --border-radius: 16px; --color: #EEF2FF;
+  --placeholder-color: rgba(238,242,255,.3);
+  --icon-color: #F5C842; --box-shadow: none;
+  padding: 0; border: 1px solid rgba(255,255,255,.09); border-radius: 16px;
+}
+
+// ── Secciones ───────────────────────────────────────────────────
+.seccion { margin-top: 16px; }
+
+.seccion-titulo {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .68rem; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(238,242,255,.45);
+  margin-bottom: 10px; padding: 0 2px;
+  ion-icon { font-size: 14px; color: #F5C842; }
+}
+
+.badge-count {
+  background: #E8003D; color: #fff;
+  font-size: .6rem; font-weight: 900;
+  border-radius: 10px; padding: 1px 7px;
+  box-shadow: 0 0 10px rgba(232,0,61,.5);
+  animation: pulso 2s ease-in-out infinite;
+}
+@keyframes pulso { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+// ── PROPUESTA CARD ──────────────────────────────────────────────
+.propuesta-card {
+  background: linear-gradient(135deg, rgba(212,160,23,.1) 0%, rgba(13,28,56,.92) 45%);
+  border: 1.5px solid rgba(245,200,66,.35);
+  border-radius: 20px; padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.4);
+  animation: entradaCard .35s ease both;
+}
+@keyframes entradaCard { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+.prop-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.prop-quien  { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.prop-nombre { font-weight: 800; font-size: .88rem; color: #fff; }
+.prop-accion { font-size: .65rem; color: rgba(238,242,255,.45); }
+.prop-hora {
+  display: flex; align-items: center; gap: 3px;
+  font-size: .6rem; color: rgba(238,242,255,.35); flex-shrink: 0;
+  ion-icon { font-size: 11px; }
+}
+
+.prop-cuerpo {
+  display: grid; grid-template-columns: 1fr 40px 1fr;
+  align-items: stretch; gap: 4px; margin-bottom: 10px;
+}
+
+.prop-lamina {
+  border-radius: 14px; padding: 10px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  text-align: center;
+  &.recibe  { background: rgba(0,200,83,.1);  border: 1px solid rgba(0,200,83,.3); }
+  &.entrega { background: rgba(232,0,61,.08); border: 1px solid rgba(232,0,61,.25); }
+}
+
+.pl-tag {
+  font-size: .5rem; font-weight: 900; letter-spacing: 1px;
+  color: #00C853; background: rgba(0,200,83,.15);
+  border-radius: 4px; padding: 1px 6px;
+  &.entregas { color: #FF7B8A; background: rgba(232,0,61,.15); }
+}
+.pl-codigo {
+  font-family: 'Impact','Arial Black',sans-serif;
+  font-size: 1rem; font-weight: 900; color: #fff; letter-spacing: .5px;
+  &.brillante { color: #F5C842; text-shadow: 0 0 12px rgba(245,200,66,.6); }
+}
+.pl-jugador { font-size: .7rem; font-weight: 600; color: rgba(238,242,255,.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.pl-pais { font-size: .56rem; color: rgba(238,242,255,.4); text-transform: uppercase; letter-spacing: .5px; }
+
+.prop-swap {
+  display: flex; align-items: center; justify-content: center;
+  ion-icon { font-size: 20px; color: #F5C842; animation: girarSwap 3s ease-in-out infinite; }
+}
+@keyframes girarSwap { 0%,100% { transform: rotate(0); } 50% { transform: rotate(180deg); } }
+
+.prop-msg {
+  font-size: .72rem; color: rgba(238,242,255,.55);
+  font-style: italic; margin: 0 0 10px; padding: 0 4px;
+}
+
+.prop-acciones { display: flex; gap: 8px; }
+
+.btn-rechazar, .btn-aceptar {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; border-radius: 12px; padding: 11px;
+  font-size: .8rem; font-weight: 800; cursor: pointer;
+  transition: transform .15s, opacity .2s;
+  ion-icon { font-size: 16px; }
+  &:active { transform: scale(.96); }
+}
+.btn-rechazar {
+  background: rgba(255,255,255,.07); color: rgba(238,242,255,.6);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.btn-aceptar {
+  background: linear-gradient(90deg, #00A843, #4CD964);
+  color: #fff; box-shadow: 0 4px 16px rgba(0,200,83,.35);
+}
+
+// ── BOT CARD ────────────────────────────────────────────────────
+.bot-card {
+  margin-top: 16px;
+  background: linear-gradient(120deg, rgba(245,200,66,.12) 0%, rgba(13,28,56,.9) 55%);
+  border: 1.5px solid rgba(245,200,66,.4);
+  border-radius: 20px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer; transition: transform .18s, box-shadow .2s;
+  box-shadow: 0 4px 20px rgba(212,160,23,.12);
+  &:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(212,160,23,.22); }
+  &:active { transform: scale(.98); }
+}
+
+.bot-avatar {
+  position: relative; width: 52px; height: 52px; flex-shrink: 0;
+  border-radius: 50%; overflow: visible;
+  background: radial-gradient(circle, rgba(245,200,66,.2), transparent);
+  display: flex; align-items: center; justify-content: center;
+
+  img { width: 48px; height: 48px; object-fit: contain;
+        animation: flotarBot 3s ease-in-out infinite; }
+}
+@keyframes flotarBot { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-4px) rotate(4deg); } }
+
+.bot-dot {
+  position: absolute; bottom: 2px; right: 2px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #00E676; border: 2px solid #0A1322;
+  box-shadow: 0 0 8px rgba(0,230,118,.7);
+}
+
+.bot-info   { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.bot-nombre {
+  font-family: 'Impact','Arial Black',sans-serif;
+  font-size: .95rem; font-weight: 900; color: #F5C842; letter-spacing: 1px;
+  display: flex; align-items: center; gap: 7px;
+}
+.bot-badge {
+  background: linear-gradient(90deg, #D4A017, #F5C842); color: #0A1322;
+  font-size: .5rem; font-weight: 900; border-radius: 4px; padding: 1px 6px;
+  letter-spacing: 1px;
+}
+.bot-desc    { font-size: .68rem; color: rgba(238,242,255,.45); }
+.bot-chevron { font-size: 20px; color: #F5C842; opacity: .6; }
+
+// ── CONVERSACIONES ──────────────────────────────────────────────
+.conv-item {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px; padding: 12px 14px;
+  margin-bottom: 8px; cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s;
+  &:hover  { background: rgba(255,255,255,.07); border-color: rgba(245,200,66,.25); }
+  &:active { transform: scale(.98); }
+}
+
+.avatar {
+  position: relative; width: 48px; height: 48px; flex-shrink: 0;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: 'Impact','Arial Black',sans-serif;
+  font-size: 1rem; font-weight: 900; color: #fff;
+  letter-spacing: .5px; box-shadow: 0 3px 10px rgba(0,0,0,.4);
+  &.mini { width: 36px; height: 36px; font-size: .8rem; }
+}
+
+.online-dot {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #00E676; border: 2.5px solid #0A1322;
+  box-shadow: 0 0 8px rgba(0,230,118,.8);
+  animation: latido 2s ease-in-out infinite;
+}
+@keyframes latido { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+
+.conv-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.conv-fila { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.conv-nombre {
+  font-size: .9rem; font-weight: 700; color: #EEF2FF;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.conv-hora { font-size: .62rem; color: rgba(238,242,255,.35); flex-shrink: 0; }
+
+.conv-preview {
+  display: flex; align-items: center; gap: 4px;
+  font-size: .73rem; color: rgba(238,242,255,.45);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  &.online-txt { color: #00E676; }
+}
+.check-mio { font-size: 13px; color: #4FC3F7; flex-shrink: 0; }
+
+.badge-noleidos {
+  background: linear-gradient(135deg, #00A843, #4CD964);
+  color: #fff; font-size: .62rem; font-weight: 900;
+  min-width: 20px; height: 20px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 6px; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,200,83,.4);
+}
+
+.conv-chevron { font-size: 18px; color: rgba(238,242,255,.25); }
+
+// ── VACÍO ───────────────────────────────────────────────────────
+.vacio {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 20px; gap: 8px; opacity: .4; text-align: center;
+  ion-icon { font-size: 46px; color: #F5C842; }
+  p    { font-size: .9rem; color: #EEF2FF; margin: 0; font-weight: 600; }
+  span { font-size: .72rem; color: rgba(238,242,255,.6); }
+}

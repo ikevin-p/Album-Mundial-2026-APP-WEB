@@ -1,0 +1,230 @@
+<!-- HEADER del chat -->
+<ion-header class="p2p-hdr">
+  <div class="hdr-franja-izq"><div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div></div>
+  <div class="hdr-franja-der"><div class="hf f4"></div><div class="hf f5"></div></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" class="hdr-btn">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <div class="hdr-usuario">
+      <div class="hdr-avatar">
+        {{ iniciales(otroNombre) }}
+        <span class="online-dot" *ngIf="otroOnline"></span>
+      </div>
+      <div class="hdr-info">
+        <span class="hdr-nombre">{{ otroNombre }}</span>
+        <span class="hdr-estado" [class.typing]="otroTyping" [class.online]="otroOnline && !otroTyping">
+          {{ otroTyping ? 'escribiendo...' : (otroOnline ? 'En línea' : 'Desconectado') }}
+        </span>
+      </div>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="abrirModal()" class="hdr-btn swap-btn" title="Proponer intercambio">
+        <ion-icon slot="icon-only" name="swap-horizontal-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="confirmarBorrar()" class="hdr-btn borrar-btn" title="Borrar chat">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="p2p-content" [class.con-fondo]="true">
+
+  <!-- BANNER: propuesta RECIBIDA pendiente -->
+  <div class="banner-propuesta recibida" *ngIf="pendienteRecibida">
+    <div class="bp-head">
+      <ion-icon name="swap-horizontal-outline"></ion-icon>
+      <span><b>{{ otroNombre }}</b> te propone un intercambio</span>
+    </div>
+    <div class="bp-laminas">
+      <div class="bp-lam recibe">
+        <span class="bp-tag">RECIBES</span>
+        <b [class.brillante]="pendienteRecibida.lamina_ofrecida.es_lamina_brillante">
+          {{ pendienteRecibida.lamina_ofrecida.codigo_lamina }}
+          <span *ngIf="pendienteRecibida.lamina_ofrecida.es_lamina_brillante">✨</span>
+        </b>
+        <small>{{ pendienteRecibida.lamina_ofrecida.nombre_jugador }}</small>
+      </div>
+      <ion-icon name="repeat-outline" class="bp-swap"></ion-icon>
+      <div class="bp-lam entrega">
+        <span class="bp-tag e">ENTREGAS</span>
+        <b [class.brillante]="pendienteRecibida.lamina_pedida.es_lamina_brillante">
+          {{ pendienteRecibida.lamina_pedida.codigo_lamina }}
+          <span *ngIf="pendienteRecibida.lamina_pedida.es_lamina_brillante">✨</span>
+        </b>
+        <small>{{ pendienteRecibida.lamina_pedida.nombre_jugador }}</small>
+      </div>
+    </div>
+    <div class="bp-botones">
+      <button class="bp-no" (click)="responder(false)"><ion-icon name="close-outline"></ion-icon> Rechazar</button>
+      <button class="bp-si" (click)="responder(true)"><ion-icon name="checkmark-outline"></ion-icon> Aceptar trato</button>
+    </div>
+  </div>
+
+  <!-- BANNER: propuesta ENVIADA pendiente -->
+  <div class="banner-propuesta enviada" *ngIf="pendienteEnviada && !pendienteRecibida">
+    <div class="bp-head">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>Propuesta enviada: <b>{{ pendienteEnviada.lamina_ofrecida.codigo_lamina }}</b>
+        ⇄ <b>{{ pendienteEnviada.lamina_pedida.codigo_lamina }}</b> — esperando respuesta</span>
+    </div>
+  </div>
+
+  <!-- MENSAJES -->
+  <div class="mensajes-wrap">
+    <ng-container *ngFor="let m of mensajes; let i = index; trackBy: trackMsg">
+
+      <!-- Separador de día -->
+      <div class="dia-sep" *ngIf="esNuevoDia(i)">
+        <span>{{ etiquetaDia(m.enviado_en) }}</span>
+      </div>
+
+      <!-- Mensaje de sistema (intercambios) -->
+      <div class="msg-sistema" *ngIf="m.es_sistema">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <span>{{ m.contenido }}</span>
+      </div>
+
+      <!-- Burbuja normal -->
+      <div class="burbuja-wrap" *ngIf="!m.es_sistema" [class.mia]="m.es_mio">
+        <div class="burbuja" [class.mia]="m.es_mio">
+          <p>{{ m.contenido }}</p>
+          <span class="burbuja-meta">
+            {{ hora(m.enviado_en) }}
+            <ion-icon name="checkmark-done-outline" *ngIf="m.es_mio"
+              [class.leido]="m.leido"></ion-icon>
+          </span>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- Indicador escribiendo -->
+    <div class="burbuja-wrap" *ngIf="otroTyping">
+      <div class="burbuja typing-bubble">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+
+    <!-- Vacío -->
+    <div class="chat-vacio" *ngIf="mensajes.length === 0">
+      <ion-icon name="football-outline"></ion-icon>
+      <p>Inicia la conversación con {{ otroNombre }}</p>
+      <button class="cta-intercambio" (click)="abrirModal()">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        Proponer un intercambio
+      </button>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- INPUT -->
+<ion-footer class="p2p-footer">
+  <div class="input-row">
+    <div class="input-pill">
+      <input type="text" [(ngModel)]="texto" (input)="onTyping()"
+             (keyup.enter)="enviar()" placeholder="Escribe un mensaje..."
+             [disabled]="!conectado" autocomplete="off"/>
+    </div>
+    <button class="btn-enviar" (click)="enviar()" [disabled]="!texto.trim() || !conectado">
+      <ion-icon name="send-outline"></ion-icon>
+    </button>
+  </div>
+  <div class="sin-conexion" *ngIf="!conectado">
+    <ion-icon name="alert-circle-outline"></ion-icon> Reconectando...
+  </div>
+</ion-footer>
+
+<!-- ════════ MODAL DE INTERCAMBIO ════════ -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-hdr">
+      <div class="modal-titulo">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <span>Proponer intercambio</span>
+      </div>
+      <button class="modal-cerrar" (click)="cerrarModal()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="modal-cargando" *ngIf="cargandoOp">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Cruzando colecciones...</span>
+      </div>
+
+      <ng-container *ngIf="!cargandoOp && oportunidades">
+
+        <!-- Sin matching posible -->
+        <div class="sin-match" *ngIf="oportunidades.yo_ofrezco.length === 0 || oportunidades.el_ofrece.length === 0">
+          <ion-icon name="football-outline"></ion-icon>
+          <p *ngIf="oportunidades.yo_ofrezco.length === 0">No tienes repetidas que le falten a {{ otroNombre }}.</p>
+          <p *ngIf="oportunidades.el_ofrece.length === 0">{{ otroNombre }} no tiene repetidas que te falten.</p>
+          <span>Sigue completando tu álbum y vuelve a intentarlo.</span>
+        </div>
+
+        <ng-container *ngIf="oportunidades.yo_ofrezco.length > 0 && oportunidades.el_ofrece.length > 0">
+
+          <!-- Columna: TÚ OFRECES -->
+          <p class="col-titulo ofrezco">
+            <span class="num">1</span> Elige qué OFRECES <small>(tus repetidas que le faltan)</small>
+          </p>
+          <div class="laminas-scroll">
+            <div class="lam-chip" *ngFor="let l of oportunidades.yo_ofrezco"
+                 [class.sel]="selOfrezco?.id === l.id"
+                 [class.brillante]="l.es_lamina_brillante"
+                 (click)="selOfrezco = l">
+              <b>{{ l.codigo_lamina }}<span *ngIf="l.es_lamina_brillante">✨</span></b>
+              <small>{{ l.nombre_jugador }}</small>
+              <span class="rep">x{{ l.cantidad - 1 }} repetida{{ l.cantidad > 2 ? 's' : '' }}</span>
+            </div>
+          </div>
+
+          <!-- Columna: TÚ RECIBES -->
+          <p class="col-titulo recibo">
+            <span class="num">2</span> Elige qué RECIBES <small>(sus repetidas que te faltan)</small>
+          </p>
+          <div class="laminas-scroll">
+            <div class="lam-chip" *ngFor="let l of oportunidades.el_ofrece"
+                 [class.sel]="selRecibo?.id === l.id"
+                 [class.brillante]="l.es_lamina_brillante"
+                 (click)="selRecibo = l">
+              <b>{{ l.codigo_lamina }}<span *ngIf="l.es_lamina_brillante">✨</span></b>
+              <small>{{ l.nombre_jugador }}</small>
+              <span class="rep">disponible</span>
+            </div>
+          </div>
+
+          <!-- Resumen -->
+          <div class="resumen" *ngIf="selOfrezco && selRecibo">
+            <div class="res-lam"><span>Das</span><b>{{ selOfrezco.codigo_lamina }}</b></div>
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+            <div class="res-lam"><span>Recibes</span><b>{{ selRecibo.codigo_lamina }}</b></div>
+          </div>
+
+          <input class="modal-msg" type="text" [(ngModel)]="msgPropuesta"
+                 placeholder="Mensaje opcional (ej: ¡me falta para cerrar Brasil!)" maxlength="300"/>
+
+          <button class="btn-proponer" (click)="proponer()"
+                  [disabled]="!selOfrezco || !selRecibo || enviandoPropuesta">
+            <ion-spinner *ngIf="enviandoPropuesta" name="crescent"></ion-spinner>
+            <ng-container *ngIf="!enviandoPropuesta">
+              <ion-icon name="swap-horizontal-outline"></ion-icon> Enviar propuesta
+            </ng-container>
+          </button>
+
+        </ng-container>
+      </ng-container>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<ion-header class="panini-header">
+  <ion-toolbar>
+    <ion-title><span class="logo">📋 MI RESUMEN</span></ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="irPaises()">
+        <ion-icon slot="icon-only" name="grid-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="salir()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="col-content">
+
+  <!-- Cargando -->
+  <div class="estado-wrap" *ngIf="cargando">
+    <div class="estado-icono">⏳</div>
+    <p>Cargando tu colección...</p>
+  </div>
+
+  <!-- Error de conexión -->
+  <div class="estado-wrap error" *ngIf="error && !cargando">
+    <div class="estado-icono">⚠️</div>
+    <p>No se pudo conectar al servidor</p>
+    <button class="btn-retry" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <!-- Contenido -->
+  <div *ngIf="!cargando && !error">
+    <!-- Stats globales -->
+    <div class="stats-wrap">
+      <div class="stat-card">
+        <span class="stat-num">{{ totalTengo }}</span>
+        <span class="stat-label">Tengo</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num rojo">{{ totalCatalogo - totalTengo }}</span>
+        <span class="stat-label">Me faltan</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num dorado">{{ totalCatalogo }}</span>
+        <span class="stat-label">Total álbum</span>
+      </div>
+    </div>
+
+    <!-- Lista por país -->
+    <div class="lista-paises">
+      <div class="fila-pais" *ngFor="let p of resumen" (click)="irPaises()">
+        <span class="pais-bandera">{{ p.bandera }}</span>
+        <div class="pais-info">
+          <span class="pais-nombre">{{ p.nombre }}</span>
+          <div class="barra-bg">
+            <div class="barra-fill"
+              [style.width.%]="p.total > 0 ? (p.tengo / p.total) * 100 : 0"
+              [style.background]="p.tengo === p.total && p.total > 0 ? '#FFD24C' : p.tengo > 0 ? '#2A9D5C' : '#555'">
+            </div>
+          </div>
+        </div>
+        <div class="pais-nums">
+          <span class="nums-tengo">{{ p.tengo }}/{{ p.total }}</span>
+          <span class="nums-cambio" *ngIf="p.paracambiar > 0">🔄{{ p.paracambiar }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

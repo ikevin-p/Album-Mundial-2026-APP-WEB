@@ -1,0 +1,66 @@
+.qr-content { --background: #0A1322; }
+.qr-hdr {
+  position: relative; box-shadow: 0 4px 20px rgba(0,0,0,.55) !important;
+  ion-toolbar { --background: transparent; --color: #fff; position: relative; z-index: 2; background: linear-gradient(135deg, #071020, #0A1628) !important; padding: 4px 8px; }
+}
+.hdr-franja-izq, .hdr-franja-der { position: absolute; top: 0; bottom: 0; width: 5px; display: flex; flex-direction: column; z-index: 3; pointer-events: none; }
+.hdr-franja-izq { left: 0; } .hdr-franja-der { right: 0; }
+.hf { flex: 1; }
+.f1 { background: #00C853; } .f2 { background: rgba(255,255,255,.5); } .f3 { background: #E8003D; }
+.f4 { background: #1565C0; } .f5 { background: #00C853; opacity: .8; }
+.hdr-btn { --color: rgba(255,255,255,.65); --background: rgba(255,255,255,.07); --border-radius: 10px; }
+.hdr-titulo-wrap { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.hdr-titulo { font-family: 'Impact','Arial Black',sans-serif; font-size: 1.05rem; font-weight: 900; color: #fff; letter-spacing: 2px; }
+.hdr-sub { font-size: .55rem; color: rgba(255,255,255,.38); letter-spacing: .5px; }
+
+.qr-inner { max-width: 420px; margin: 0 auto; padding: 28px 20px 48px; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+
+// Avatar
+.avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #1565C0, #42A5F5); display: flex; align-items: center; justify-content: center; font-family: 'Impact','Arial Black',sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+.user-info { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.user-nombre { font-family: 'Impact','Arial Black',sans-serif; font-size: 1.1rem; color: #fff; font-weight: 900; }
+.user-at { font-size: .72rem; color: rgba(238,242,255,.4); }
+
+// QR Card
+.qr-card {
+  width: 100%; background: rgba(255,255,255,.04); border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: 24px; padding: 24px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+}
+.qr-label { display: flex; align-items: center; gap: 8px; font-size: .75rem; font-weight: 700; color: rgba(238,242,255,.55); text-transform: uppercase; letter-spacing: 1px; ion-icon { font-size: 16px; color: #FFC400; } }
+
+.qr-img-wrap {
+  position: relative; padding: 12px;
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.4);
+}
+.qr-img { width: 220px; height: 220px; display: block; border-radius: 8px; }
+
+// Esquinas decorativas
+.qr-corner {
+  position: absolute; width: 22px; height: 22px;
+  border-color: #FFC400; border-style: solid;
+  &.tl { top: -1px; left: -1px; border-width: 3px 0 0 3px; border-radius: 6px 0 0 0; }
+  &.tr { top: -1px; right: -1px; border-width: 3px 3px 0 0; border-radius: 0 6px 0 0; }
+  &.bl { bottom: -1px; left: -1px; border-width: 0 0 3px 3px; border-radius: 0 0 0 6px; }
+  &.br { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; border-radius: 0 0 6px 0; }
+}
+
+.qr-instruccion { font-size: .72rem; color: rgba(238,242,255,.35); text-align: center; line-height: 1.5; margin: 0; max-width: 260px; }
+
+// Acciones
+.acciones { display: flex; gap: 12px; width: 100%; }
+.btn-copiar, .btn-compartir {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: 14px; padding: 13px; font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .18s;
+  ion-icon { font-size: 18px; }
+  &:active { transform: scale(.97); }
+}
+.btn-copiar { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: rgba(238,242,255,.7); }
+.btn-compartir { background: linear-gradient(90deg, #00A843, #4CD964); color: #fff; box-shadow: 0 4px 16px rgba(0,200,83,.35); }
+
+// Info card
+.info-card { width: 100%; background: rgba(255,196,0,.07); border: 1px solid rgba(255,196,0,.2); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; p { font-size: .62rem; color: rgba(238,242,255,.35); text-transform: uppercase; letter-spacing: 1px; margin: 0; } }
+.user-id-badge { font-family: 'Impact','Arial Black',sans-serif; font-size: 1.1rem; color: #FFC400; letter-spacing: 1px; }

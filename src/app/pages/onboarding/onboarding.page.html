@@ -1,0 +1,54 @@
+<ion-content class="ob-content" [fullscreen]="true">
+  <div class="ob-wrap">
+
+    <!-- Fondo -->
+    <div class="ob-fondo"></div>
+    <div class="franjas-izq"><div class="f f1"></div><div class="f f2"></div><div class="f f3"></div></div>
+    <div class="franjas-der"><div class="f f4"></div><div class="f f5"></div></div>
+
+    <!-- Skip -->
+    <button class="btn-skip" (click)="finalizar()" *ngIf="!esUltimo">Saltar</button>
+
+    <!-- Indicadores de paso -->
+    <div class="dots">
+      <div class="dot" *ngFor="let p of PASOS; let i = index" [class.activo]="i === pasoActual" [style.background]="i === pasoActual ? paso.color : 'rgba(255,255,255,0.2)'"></div>
+    </div>
+
+    <!-- Contenido del paso -->
+    <div class="paso-contenido" [style.--color-acento]="paso.color">
+
+      <!-- Ícono grande animado -->
+      <div class="icono-wrap" [style.background]="paso.color + '22'" [style.border-color]="paso.color + '44'">
+        <div class="icono-inner" [style.background]="paso.color + '33'">
+          <ion-icon [name]="paso.icono" [style.color]="paso.color"></ion-icon>
+        </div>
+        <img *ngIf="paso.img" [src]="paso.img" alt="" class="paso-img">
+      </div>
+
+      <!-- Texto -->
+      <div class="paso-txt">
+        <h2 class="paso-titulo">{{ paso.titulo }}</h2>
+        <p class="paso-desc">{{ paso.desc }}</p>
+      </div>
+
+    </div>
+
+    <!-- Navegación -->
+    <div class="nav-row">
+      <button class="btn-ant" (click)="anterior()" [disabled]="esPrimero">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+
+      <button class="btn-sig" (click)="siguiente()" [style.background]="paso.color">
+        <span>{{ esUltimo ? '¡Comenzar!' : 'Siguiente' }}</span>
+        <ion-icon [name]="esUltimo ? 'checkmark-circle-outline' : 'arrow-forward-outline'"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Logo Panini al pie -->
+    <div class="ob-panini">
+      <img src="assets/panini-logo.png" alt="Panini" class="panini-img">
+    </div>
+
+  </div>
+</ion-content>

@@ -1,0 +1,160 @@
+<ion-content class="login-content" [fullscreen]="true">
+  <div class="login-wrap">
+
+    <div class="bg-estadio"></div>
+    <div class="bg-oscuro"></div>
+
+    <div class="franjas-izq">
+      <div class="f fi-verde"></div>
+      <div class="f fi-rojo"></div>
+      <div class="f fi-azul"></div>
+      <div class="f fi-dorado"></div>
+    </div>
+    <div class="franjas-der">
+      <div class="f fd-azul"></div>
+      <div class="f fd-verde"></div>
+      <div class="f fd-rojo"></div>
+    </div>
+
+    <div class="confetti-deco">
+      <span *ngFor="let c of confettiItems" class="cdot" [style]="c"></span>
+    </div>
+
+    <!-- Sobres flotando IZQUIERDA -->
+    <div class="sobres-flotante">
+      <img src="assets/sobres.png" alt="Sobres Panini">
+    </div>
+
+    <!-- Balón flotando DERECHA -->
+    <div class="balon-flotante">
+      <img src="assets/balon.png" alt="Balón Trionda">
+    </div>
+
+    <div class="contenido">
+
+      <div class="hero-logo">
+        <img src="assets/logo-sinfondo.png" alt="FIFA World Cup 26" class="logo-img">
+      </div>
+
+      <div class="titulos">
+        <p class="wc-sup">FIFA WORLD CUP</p>
+        <div class="num-2026">
+          <span class="blanco">20</span><span class="rojo">2</span><span class="verde">6</span>
+        </div>
+        <p class="album-sub">ÁLBUM OFICIAL DE FIGURITAS</p>
+      </div>
+
+      <div class="login-card">
+
+        <div class="card-header">
+          <div class="linea-card verde"></div>
+          <span class="card-titulo">INICIA SESIÓN</span>
+          <div class="linea-card roja"></div>
+        </div>
+
+        <div class="campo-wrap">
+          <label class="campo-label">USUARIO</label>
+          <div class="input-box">
+            <ion-icon name="person-outline" class="input-icon"></ion-icon>
+            <input type="text" [(ngModel)]="username"
+                   placeholder="Ingresa tu usuario" autocomplete="off"/>
+          </div>
+        </div>
+
+        <div class="campo-wrap">
+          <label class="campo-label">CONTRASEÑA</label>
+          <div class="input-box">
+            <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+            <input [type]="mostrarPass ? 'text' : 'password'"
+                   [(ngModel)]="password"
+                   placeholder="Ingresa tu contraseña"
+                   (keyup.enter)="login()"/>
+            <button class="ojo-btn" (click)="mostrarPass=!mostrarPass">
+              <ion-icon [name]="mostrarPass ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="error-box" *ngIf="errorMsg">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ errorMsg }}
+        </div>
+
+        <button class="btn-ingresar" (click)="login()" [disabled]="cargando">
+          <span *ngIf="!cargando">INGRESAR AL ÁLBUM</span>
+          <span *ngIf="cargando" class="spin-wrap">
+            <ion-icon name="reload-outline" class="spin"></ion-icon>
+          </span>
+        </button>
+
+        <div class="divider">
+          <div class="div-linea"></div>
+          <span>O CONTINÚA CON</span>
+          <div class="div-linea"></div>
+        </div>
+
+        <!-- Único acceso social: Google -->
+        <button class="btn-google-login" (click)="abrirGoogle()">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#EA4335" d="M5.266,9.765C6.199,6.939 8.854,4.909 12,4.909C13.655,4.909 15.164,5.473 16.356,6.4L19.295,3.462C17.324,1.721 14.811,0.636 12,0.636C7.273,0.636 3.255,3.447 1.2,7.464L5.266,9.765Z"/>
+            <path fill="#34A853" d="M16.041,18.013C14.951,18.716 13.566,19.091 12,19.091C8.866,19.091 6.219,17.077 5.277,14.268L1.237,16.525C3.253,20.576 7.273,23.364 12,23.364C14.7,23.364 17.218,22.393 19.164,20.618L16.041,18.013Z"/>
+            <path fill="#4A90D9" d="M19.164,20.618C21.196,18.764 22.455,16.055 22.455,12C22.455,11.218 22.345,10.4 22.182,9.636L12,9.636L12,14.545L17.927,14.545C17.636,16.018 16.8,17.236 16.041,18.013L19.164,20.618Z"/>
+            <path fill="#FBBC05" d="M5.277,14.268C5.038,13.556 4.909,12.794 4.909,12C4.909,11.218 5.034,10.467 5.266,9.765L1.2,7.464C0.436,9.009 0,10.745 0,12C0,13.218 0.436,14.927 1.237,16.525L5.277,14.268Z"/>
+          </svg>
+          <span>Continuar con Google</span>
+        </button>
+
+        <p class="registro-txt">
+          ¿No tienes cuenta?
+          <span class="reg-link" (click)="irRegistro()">Regístrate</span>
+        </p>
+
+      </div>
+
+      <!-- Logo Panini oficial -->
+      <div class="panini-wrap">
+        <img src="assets/panini-logo.png" alt="Panini" class="panini-img">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MODAL: Acceso con Google ── -->
+  <div class="gmodal-overlay" *ngIf="googleModal" (click)="cerrarGoogle()">
+    <div class="gmodal-card" (click)="$event.stopPropagation()">
+
+      <button class="gmodal-cerrar" (click)="cerrarGoogle()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <div class="gmodal-logo">
+        <svg viewBox="0 0 24 24" width="34" height="34">
+          <path fill="#EA4335" d="M5.266,9.765C6.199,6.939 8.854,4.909 12,4.909C13.655,4.909 15.164,5.473 16.356,6.4L19.295,3.462C17.324,1.721 14.811,0.636 12,0.636C7.273,0.636 3.255,3.447 1.2,7.464L5.266,9.765Z"/>
+          <path fill="#34A853" d="M16.041,18.013C14.951,18.716 13.566,19.091 12,19.091C8.866,19.091 6.219,17.077 5.277,14.268L1.237,16.525C3.253,20.576 7.273,23.364 12,23.364C14.7,23.364 17.218,22.393 19.164,20.618L16.041,18.013Z"/>
+          <path fill="#4A90D9" d="M19.164,20.618C21.196,18.764 22.455,16.055 22.455,12C22.455,11.218 22.345,10.4 22.182,9.636L12,9.636L12,14.545L17.927,14.545C17.636,16.018 16.8,17.236 16.041,18.013L19.164,20.618Z"/>
+          <path fill="#FBBC05" d="M5.277,14.268C5.038,13.556 4.909,12.794 4.909,12C4.909,11.218 5.034,10.467 5.266,9.765L1.2,7.464C0.436,9.009 0,10.745 0,12C0,13.218 0.436,14.927 1.237,16.525L5.277,14.268Z"/>
+        </svg>
+      </div>
+
+      <h3 class="gmodal-titulo">Acceder con Google</h3>
+      <p class="gmodal-sub">Ingresa tu correo Gmail. Si es tu primera vez, crearemos tu álbum automáticamente.</p>
+
+      <div class="gmodal-input">
+        <ion-icon name="mail-outline"></ion-icon>
+        <input type="email" [(ngModel)]="googleEmail"
+               placeholder="tucorreo@gmail.com"
+               (keyup.enter)="entrarConGoogle()" autocomplete="email"/>
+      </div>
+
+      <div class="gmodal-error" *ngIf="googleError">
+        <ion-icon name="alert-circle-outline"></ion-icon>{{ googleError }}
+      </div>
+
+      <button class="gmodal-btn" (click)="entrarConGoogle()" [disabled]="googleCargando">
+        <span *ngIf="!googleCargando">Continuar</span>
+        <ion-icon *ngIf="googleCargando" name="reload-outline" class="spin"></ion-icon>
+      </button>
+
+    </div>
+  </div>
+</ion-content>

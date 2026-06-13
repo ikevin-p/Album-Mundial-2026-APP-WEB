@@ -1,0 +1,88 @@
+<!-- HEADER Panini Pal -->
+<ion-header class="bot-hdr">
+  <div class="hdr-franja-izq"><div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div></div>
+  <div class="hdr-franja-der"><div class="hf f4"></div><div class="hf f5"></div></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" class="hdr-btn">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <div class="hdr-bot">
+      <div class="hdr-bot-avatar">
+        <img src="assets/balon.png" alt="Panini Pal">
+      </div>
+      <div class="hdr-bot-info">
+        <span class="hdr-bot-nombre">Panini Pal <span class="ia-badge">IA</span></span>
+        <span class="hdr-bot-estado" [class.typing]="botEscribiendo">
+          {{ botEscribiendo ? 'pensando...' : 'Asistente del álbum · Siempre en línea' }}
+        </span>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bot-content">
+  <div class="mensajes-wrap">
+
+    <!-- Bienvenida si no hay historial -->
+    <div class="bienvenida" *ngIf="mensajes.length === 0">
+      <div class="bienvenida-avatar">
+        <img src="assets/balon.png" alt="Panini Pal">
+        <div class="anillo"></div>
+      </div>
+      <h2>¡Hola, coleccionista! ⚽</h2>
+      <p>Soy <b>Panini Pal</b>, tu asistente del Álbum Mundial 2026.
+         Pregúntame sobre láminas, selecciones, intercambios o datos del torneo.</p>
+    </div>
+
+    <!-- Mensajes -->
+    <ng-container *ngFor="let m of mensajes; trackBy: trackMsg">
+      <div class="burbuja-wrap" [class.mia]="m.es_mio">
+        <div class="bot-mini-avatar" *ngIf="!m.es_mio">
+          <img src="assets/balon.png" alt="">
+        </div>
+        <div class="burbuja" [class.mia]="m.es_mio" [class.bot]="!m.es_mio">
+          <p>{{ m.contenido }}</p>
+          <span class="meta">{{ hora(m.enviado_en) }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Bot escribiendo -->
+    <div class="burbuja-wrap" *ngIf="botEscribiendo">
+      <div class="bot-mini-avatar"><img src="assets/balon.png" alt=""></div>
+      <div class="burbuja bot typing-bubble">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
+
+<!-- FOOTER: sugerencias + input -->
+<ion-footer class="bot-footer">
+
+  <div class="chips-row" *ngIf="!botEscribiendo">
+    <button class="chip" *ngFor="let s of SUGERENCIAS" (click)="enviar(s)">
+      <ion-icon name="sparkles-outline"></ion-icon>{{ s }}
+    </button>
+  </div>
+
+  <div class="input-row">
+    <div class="input-pill">
+      <input type="text" [(ngModel)]="texto" (keyup.enter)="enviar()"
+             placeholder="Pregúntale a Panini Pal..."
+             [disabled]="!conectado || botEscribiendo" autocomplete="off"/>
+    </div>
+    <button class="btn-enviar" (click)="enviar()"
+            [disabled]="!texto.trim() || !conectado || botEscribiendo">
+      <ion-icon name="send-outline"></ion-icon>
+    </button>
+  </div>
+
+  <div class="sin-conexion" *ngIf="!conectado">
+    <ion-icon name="alert-circle-outline"></ion-icon> Reconectando...
+  </div>
+</ion-footer>

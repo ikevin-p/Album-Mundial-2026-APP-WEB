@@ -1,0 +1,68 @@
+<ion-header class="qr-hdr">
+  <div class="hdr-franja-izq"><div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div></div>
+  <div class="hdr-franja-der"><div class="hf f4"></div><div class="hf f5"></div></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" class="hdr-btn">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <div class="hdr-titulo-wrap">
+      <span class="hdr-titulo">MI CÓDIGO QR</span>
+      <span class="hdr-sub">Comparte tu perfil con otros coleccionistas</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="qr-content">
+  <div class="qr-inner">
+
+    <!-- Avatar -->
+    <div class="avatar-wrap">
+      <div class="avatar">{{ iniciales }}</div>
+      <div class="user-info">
+        <span class="user-nombre">{{ usuario.nombre_real || usuario.username }}</span>
+        <span class="user-at">&#64;{{ usuario.username }}</span>
+      </div>
+    </div>
+
+    <!-- QR Card -->
+    <div class="qr-card">
+      <div class="qr-label">
+        <ion-icon name="qr-code-outline"></ion-icon>
+        <span>Escanea para chatear</span>
+      </div>
+
+      <div class="qr-img-wrap">
+        <img *ngIf="qrDataUrl" [src]="qrDataUrl" alt="QR Code" class="qr-img">
+        <div class="qr-corner tl"></div>
+        <div class="qr-corner tr"></div>
+        <div class="qr-corner bl"></div>
+        <div class="qr-corner br"></div>
+      </div>
+
+      <p class="qr-instruccion">
+        Otro coleccionista escanea este código y se abre directamente el chat contigo
+      </p>
+    </div>
+
+    <!-- Botones -->
+    <div class="acciones">
+      <button class="btn-copiar" (click)="copiarId()">
+        <ion-icon name="copy-outline"></ion-icon>
+        Copiar usuario
+      </button>
+      <button class="btn-compartir" (click)="compartir()">
+        <ion-icon name="share-outline"></ion-icon>
+        Compartir
+      </button>
+    </div>
+
+    <!-- Info adicional -->
+    <div class="info-card">
+      <p>Tu ID de coleccionista</p>
+      <span class="user-id-badge">&#64;{{ usuario.username }}</span>
+    </div>
+
+  </div>
+</ion-content>

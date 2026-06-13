@@ -1,0 +1,248 @@
+:host {
+  --p-azul:   #0A1F44;
+  --p-dorado: #FFD24C;
+  --p-verde:  #2A9D5C;
+  --p-rojo:   #E63946;
+  --p-hueso:  #F5F3ED;
+}
+
+// Header con color dinámico del país
+.jugador-header ion-toolbar {
+  --background: var(--fondo, #0A1F44);
+  --color: #FFFFFF;
+  border-bottom: 3px solid rgba(255,255,255,0.25);
+}
+
+.titulo {
+  font-family: 'Impact', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.jugadores-content {
+  --background: linear-gradient(180deg, #0A1F44 0%, #0D2754 100%);
+}
+
+// Hint de instrucción
+.hint {
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 0.68rem;
+  color: rgba(245,243,237,0.45);
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+// Vacío
+.vacio {
+  text-align: center;
+  padding: 80px 30px;
+  color: rgba(245,243,237,0.7);
+  .vacio-icono { font-size: 4rem; margin-bottom: 12px; }
+  p { font-size: 1rem; font-weight: 600; }
+}
+
+// Grid 3 columnas para que quepan más en pantalla
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10px 8px 30px;
+}
+
+// Lámina base — sin pegar (gris/apagada)
+.lamina {
+  position: relative;
+  background: #2A3550;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 6px 8px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 140px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  // Sin pegar: apagada
+  opacity: 0.5;
+  filter: grayscale(0.6);
+}
+
+// Lámina pegada (la tiene)
+.lamina.pegada {
+  background: var(--p-hueso);
+  border-color: rgba(255,255,255,0.3);
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+// Lámina brillante pegada — borde dorado
+.lamina.brillante.pegada {
+  border-color: var(--p-dorado);
+  background: linear-gradient(150deg, #FFFDF5 0%, #FFF3C0 100%);
+  box-shadow: 0 0 16px rgba(255,210,76,0.55), 0 4px 12px rgba(0,0,0,0.3);
+}
+
+// Brillante sin pegar — algo de dorado igual
+.lamina.brillante:not(.pegada) {
+  border-color: rgba(255,210,76,0.3);
+  opacity: 0.6;
+  filter: grayscale(0.3);
+}
+
+// Animación de "pegar" — pequeño rebote
+.lamina.animando {
+  transform: scale(1.06);
+  box-shadow: 0 0 20px rgba(255,210,76,0.5);
+}
+
+.lamina:active {
+  transform: scale(0.94);
+}
+
+// Tag brillante (esquina)
+.brillo-tag {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  font-size: 0.8rem;
+  color: var(--p-dorado);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+}
+
+// Código
+.codigo {
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #fff;
+  border-radius: 5px;
+  padding: 1px 7px;
+  margin-bottom: 7px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+// Avatar
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+
+  span {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    font-family: 'Impact', sans-serif;
+  }
+}
+
+// Nombre
+.nombre {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--p-azul);
+  line-height: 1.15;
+  margin-bottom: 6px;
+
+  // Cuando no está pegada, usar color claro
+  .lamina:not(.pegada) & {
+    color: rgba(245,243,237,0.7);
+  }
+}
+
+// Estado
+.estado {
+  margin-top: auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(245,243,237,0.5);
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 3px 8px;
+  width: 100%;
+  text-align: center;
+
+  &.tiene {
+    color: #fff;
+    background: var(--p-verde);
+  }
+
+  &.repetida {
+    background: var(--p-rojo);
+  }
+}
+
+// ── MODO SELECCIÓN MÚLTIPLE ──────────────────────────────────
+.btn-multi  { --color: #FFC400; }
+.btn-sel-all { --color: #00E676; }
+.btn-desel  { --color: #FF4D6D; }
+.btn-cancelar { --color: rgba(255,255,255,0.7); }
+
+.sel-titulo {
+  font-family: 'Impact','Arial Black',sans-serif;
+  font-size: .95rem; font-weight: 900; color: #fff;
+  letter-spacing: 1px; text-align: center;
+}
+
+// Barra de progreso del país
+.pais-progreso {
+  padding: 10px 16px 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.prog-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.prog-txt { font-size: .68rem; color: rgba(245,243,237,.5); }
+.prog-pct { font-family: 'Impact','Arial Black',sans-serif; font-size: .88rem; color: #fff; font-weight: 900; }
+.prog-barra-bg { height: 5px; background: rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
+.prog-barra-fill { height: 100%; border-radius: 4px; transition: width .8s ease; }
+
+// Estado seleccionada
+.lamina.seleccionada {
+  border-color: #00E676 !important;
+  box-shadow: 0 0 0 2px rgba(0,230,118,.35), 0 4px 14px rgba(0,0,0,.4) !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: scale(1.04);
+}
+
+.lamina.modo-sel {
+  cursor: pointer;
+  &:active { transform: scale(.96); }
+}
+
+// Icono de check dentro de la lámina
+.sel-check {
+  position: absolute; top: 6px; left: 6px; z-index: 5;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  ion-icon { font-size: 13px; }
+}
+
+// Botón flotante de confirmación
+.fab-confirmar {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px; z-index: 999;
+  background: linear-gradient(90deg, #00A843, #4CD964);
+  color: #fff; font-family: 'Impact','Arial Black',sans-serif;
+  font-size: .9rem; font-weight: 900; letter-spacing: 1px;
+  border: none; border-radius: 30px; padding: 14px 28px;
+  box-shadow: 0 6px 28px rgba(0,200,83,.5);
+  cursor: pointer; white-space: nowrap;
+  animation: subirFab .3s cubic-bezier(.34,1.3,.64,1) both;
+  ion-icon { font-size: 20px; }
+  &:active { transform: translateX(-50%) scale(.96); }
+}
+@keyframes subirFab { from { bottom: -60px; opacity: 0; } to { bottom: 24px; opacity: 1; } }

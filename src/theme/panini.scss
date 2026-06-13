@@ -1,0 +1,35 @@
+// ============================================================
+// TEMA GLOBAL PANINI — FIFA World Cup 2026
+// ============================================================
+// Se importa en global.scss para que aplique en toda la app.
+
+// Fuente deportiva condensada (cargada via @import en global.scss)
+// Usamos Barlow Condensed para titulos y Roboto para cuerpo.
+
+:root {
+  // Paleta principal
+  --p-azul:        #0A1F44;   // Fondo profundo (tapa del album)
+  --p-azul2:       #122859;   // Cards de pais con laminas
+  --p-dorado:      #FFD24C;   // Acentos, láminas especiales, CTA
+  --p-dorado2:     #FFA726;   // Gradiente dorado
+  --p-rojo:        #E63946;   // Badges, alertas, acciones destructivas
+  --p-verde:       #2A9D5C;   // Estado "la tengo" / completado
+  --p-hueso:       #F5F3ED;   // Texto sobre azul, fondo de cromos
+  --p-gris:        #B0B0B0;   // Casilleros vacios
+
+  // Tipografia
+  --font-display:  'Barlow Condensed', 'Impact', sans-serif;
+  --font-body:     'Roboto', 'Helvetica Neue', sans-serif;
+
+  // Radios
+  --r-card:   14px;
+  --r-badge:  20px;
+
+  // Sombras
+  --sombra-card:    0 6px 18px rgba(0,0,0,0.35);
+  --sombra-dorado:  0 0 18px rgba(255,210,76,0.65);
+}
+
+// Scrollbar minimalista en WebView
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(255,210,76,0.4); border-radius: 4px; }

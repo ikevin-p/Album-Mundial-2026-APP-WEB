@@ -1,0 +1,163 @@
+<!-- HEADER FIFA -->
+<ion-header class="chat-hdr">
+  <div class="hdr-franja-izq"><div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div></div>
+  <div class="hdr-franja-der"><div class="hf f4"></div><div class="hf f5"></div></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" class="hdr-btn">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <div class="hdr-titulo-wrap">
+      <span class="hdr-titulo">MENSAJES</span>
+      <span class="hdr-sub">Centro de intercambio · FIFA 2026</span>
+    </div>
+    <ion-buttons slot="end">
+      <ion-button (click)="abrirBot()" class="hdr-btn bot-btn">
+        <ion-icon slot="icon-only" name="sparkles-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="chat-list-content">
+  <ion-refresher slot="fixed" (ionRefresh)="cargarTodo($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-inner">
+
+    <!-- BUSCADOR -->
+    <div class="buscador-wrap">
+      <ion-searchbar [(ngModel)]="busqueda" (ionInput)="onBuscar()"
+        placeholder="Buscar coleccionistas..." [debounce]="250" class="buscador">
+      </ion-searchbar>
+    </div>
+
+    <!-- PROPUESTAS PENDIENTES -->
+    <div class="seccion" *ngIf="pendientes.length > 0 && !buscando">
+      <div class="seccion-titulo">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <span>Propuestas de intercambio</span>
+        <span class="badge-count">{{ pendientes.length }}</span>
+      </div>
+
+      <div class="propuesta-card" *ngFor="let p of pendientes">
+        <div class="prop-header">
+          <div class="avatar mini" [style.background]="gradiente(p.proponente.username)">
+            {{ iniciales(p.proponente.nombre_real || p.proponente.username) }}
+          </div>
+          <div class="prop-quien">
+            <span class="prop-nombre">{{ p.proponente.nombre_real || p.proponente.username }}</span>
+            <span class="prop-accion">te propone un intercambio</span>
+          </div>
+          <span class="prop-hora"><ion-icon name="time-outline"></ion-icon>{{ horaCorta(p.creado_en) }}</span>
+        </div>
+
+        <div class="prop-cuerpo">
+          <div class="prop-lamina recibe">
+            <span class="pl-tag">RECIBES</span>
+            <span class="pl-codigo" [class.brillante]="p.lamina_ofrecida.es_lamina_brillante">
+              {{ p.lamina_ofrecida.codigo_lamina }}
+              <span *ngIf="p.lamina_ofrecida.es_lamina_brillante">✨</span>
+            </span>
+            <span class="pl-jugador">{{ p.lamina_ofrecida.nombre_jugador }}</span>
+            <span class="pl-pais">{{ p.lamina_ofrecida.pais }}</span>
+          </div>
+          <div class="prop-swap"><ion-icon name="swap-horizontal-outline"></ion-icon></div>
+          <div class="prop-lamina entrega">
+            <span class="pl-tag entregas">ENTREGAS</span>
+            <span class="pl-codigo" [class.brillante]="p.lamina_pedida.es_lamina_brillante">
+              {{ p.lamina_pedida.codigo_lamina }}
+              <span *ngIf="p.lamina_pedida.es_lamina_brillante">✨</span>
+            </span>
+            <span class="pl-jugador">{{ p.lamina_pedida.nombre_jugador }}</span>
+            <span class="pl-pais">{{ p.lamina_pedida.pais }}</span>
+          </div>
+        </div>
+
+        <p class="prop-msg" *ngIf="p.mensaje">"{{ p.mensaje }}"</p>
+
+        <div class="prop-acciones">
+          <button class="btn-rechazar" (click)="responder(p, false)">
+            <ion-icon name="close-outline"></ion-icon> Rechazar
+          </button>
+          <button class="btn-aceptar" (click)="responder(p, true)">
+            <ion-icon name="checkmark-outline"></ion-icon> Aceptar trato
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASISTENTE PANINI PAL -->
+    <div class="bot-card" (click)="abrirBot()" *ngIf="!buscando">
+      <div class="bot-avatar">
+        <img src="assets/balon.png" alt="Panini Pal">
+        <span class="bot-dot"></span>
+      </div>
+      <div class="bot-info">
+        <span class="bot-nombre">Panini Pal <span class="bot-badge">IA</span></span>
+        <span class="bot-desc">Tu asistente del álbum · Pregúntame lo que sea</span>
+      </div>
+      <ion-icon name="sparkles-outline" class="bot-chevron"></ion-icon>
+    </div>
+
+    <!-- RESULTADOS DE BÚSQUEDA -->
+    <div class="seccion" *ngIf="buscando">
+      <div class="seccion-titulo">
+        <ion-icon name="people-outline"></ion-icon>
+        <span>Coleccionistas</span>
+      </div>
+      <div class="conv-item" *ngFor="let u of usuarios" (click)="abrirChat(u)">
+        <div class="avatar" [style.background]="gradiente(u.username)">
+          {{ iniciales(u.nombre_real || u.username) }}
+          <span class="online-dot" *ngIf="u.esta_en_linea"></span>
+        </div>
+        <div class="conv-info">
+          <span class="conv-nombre">{{ u.nombre_real || u.username }}</span>
+          <span class="conv-preview" [class.online-txt]="u.esta_en_linea">{{ ultimoVistoTxt(u) }}</span>
+        </div>
+        <ion-icon name="chatbubbles-outline" class="conv-chevron"></ion-icon>
+      </div>
+      <div class="vacio" *ngIf="usuarios.length === 0">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>Sin resultados para "{{ busqueda }}"</p>
+      </div>
+    </div>
+
+    <!-- CONVERSACIONES -->
+    <div class="seccion" *ngIf="!buscando">
+      <div class="seccion-titulo">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <span>Conversaciones</span>
+      </div>
+
+      <div class="conv-item" *ngFor="let c of conversaciones" (click)="abrirChat(c.usuario)">
+        <div class="avatar" [style.background]="gradiente(c.usuario.username)">
+          {{ iniciales(c.usuario.nombre_real || c.usuario.username) }}
+          <span class="online-dot" *ngIf="c.usuario.esta_en_linea"></span>
+        </div>
+        <div class="conv-info">
+          <div class="conv-fila">
+            <span class="conv-nombre">{{ c.usuario.nombre_real || c.usuario.username }}</span>
+            <span class="conv-hora">{{ horaCorta(c.ultimo_en) }}</span>
+          </div>
+          <div class="conv-fila">
+            <span class="conv-preview">
+              <ion-icon name="checkmark-done-outline" *ngIf="c.ultimo_es_mio" class="check-mio"></ion-icon>
+              {{ c.ultimo_mensaje || 'Inicia la conversación' }}
+            </span>
+            <span class="badge-noleidos" *ngIf="c.no_leidos > 0">{{ c.no_leidos }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vacio" *ngIf="conversaciones.length === 0 && !cargando">
+        <ion-icon name="football-outline"></ion-icon>
+        <p>Aún no tienes conversaciones</p>
+        <span>Busca coleccionistas arriba para empezar a intercambiar</span>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

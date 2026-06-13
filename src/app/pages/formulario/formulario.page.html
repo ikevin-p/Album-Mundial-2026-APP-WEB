@@ -1,0 +1,64 @@
+<ion-header class="panini-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="'/jugadores/' + (lamina?.pais || '')" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <span class="logo">DETALLE LÁMINA</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="form-content">
+
+  <div class="estado-wrap" *ngIf="cargando">
+    <p>Cargando...</p>
+  </div>
+
+  <div class="estado-wrap error" *ngIf="error && !cargando">
+    <p>⚠️ No se pudo cargar la lámina</p>
+  </div>
+
+  <div class="detalle-wrap" *ngIf="lamina && !cargando && !error">
+
+    <!-- Card de la lámina -->
+    <div class="lamina-card" [class.brillante]="esBrillante()">
+      <span class="brillo-tag" *ngIf="esBrillante()">✦ ESPECIAL</span>
+
+      <div class="codigo-tag">{{ lamina.codigo_lamina }}</div>
+
+      <div class="avatar-grande">
+        <span>{{ lamina.nombre_jugador[0] }}</span>
+      </div>
+
+      <div class="jugador-nombre">{{ lamina.nombre_jugador }}</div>
+      <div class="jugador-pais">{{ lamina.pais }}</div>
+      <div class="jugador-club" *ngIf="lamina.club">{{ lamina.club }}</div>
+
+      <!-- Estado actual -->
+      <div class="estado-actual" [class.tiene]="(lamina.cantidad ?? 0) >= 1">
+        <span *ngIf="(lamina.cantidad ?? 0) === 0">Sin pegar</span>
+        <span *ngIf="(lamina.cantidad ?? 0) === 1">✔ La tengo</span>
+        <span *ngIf="(lamina.cantidad ?? 0) > 1">🔄 {{ lamina.cantidad }} (repetidas)</span>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="acciones">
+      <button class="btn-toggle" (click)="toggle()" [disabled]="guardando">
+        <span *ngIf="(lamina.cantidad ?? 0) === 0">➕ Marcar como pegada</span>
+        <span *ngIf="(lamina.cantidad ?? 0) >= 1">+1 Repetida</span>
+      </button>
+
+      <button class="btn-reset" (click)="reset()" [disabled]="guardando || (lamina.cantidad ?? 0) === 0">
+        🗑 Quitar del álbum
+      </button>
+
+      <button class="btn-volver" (click)="volver()">
+        ← Volver al país
+      </button>
+    </div>
+
+  </div>
+
+</ion-content>

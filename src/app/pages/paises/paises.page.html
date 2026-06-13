@@ -1,0 +1,198 @@
+<ion-header class="panini-header">
+
+  <!-- Fondo estadio -->
+  <div class="hdr-bg"></div>
+  <!-- Franjas color FIFA -->
+  <div class="hdr-franja-izq">
+    <div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div>
+  </div>
+  <div class="hdr-franja-der">
+    <div class="hf f4"></div><div class="hf f5"></div>
+  </div>
+
+  <ion-toolbar>
+    <!-- Identidad: logo + título -->
+    <div class="hdr-identidad" slot="start">
+      <img src="assets/logo-sinfondo.png" alt="FIFA 26" class="hdr-logo">
+      <div class="hdr-txt">
+        <span class="hdr-titulo">ÁLBUM MUNDIAL</span>
+        <span class="hdr-sub">FIFA WORLD CUP 2026 · PANINI</span>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <ion-buttons slot="end">
+      <ion-button (click)="abrirEstadisticas()" class="hdr-btn stats-btn">
+        <ion-icon slot="icon-only" name="bar-chart-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="toggleVista()" class="hdr-btn">
+        <ion-icon slot="icon-only" [name]="vistaLista ? 'grid-outline' : 'list-outline'"></ion-icon>
+      </ion-button>
+      <ion-button (click)="abrirChat()" class="hdr-btn chat-btn">
+        <ion-icon slot="icon-only" name="chatbubbles-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="abrirPerfil()" class="hdr-btn perfil-btn">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="salir()" class="hdr-btn salir-btn">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Stats row dentro del header -->
+  <div class="hdr-stats">
+    <div class="hdr-stat">
+      <span class="hs-num">{{ totalTengo }}</span>
+      <span class="hs-lbl">Tengo</span>
+    </div>
+    <div class="hdr-sep"></div>
+    <div class="hdr-stat">
+      <span class="hs-num rojo">{{ totalFaltantes }}</span>
+      <span class="hs-lbl">Faltan</span>
+    </div>
+    <div class="hdr-sep"></div>
+    <div class="hdr-stat">
+      <span class="hs-num dorado">{{ totalParaCambiar }}</span>
+      <span class="hs-lbl">Cambio</span>
+    </div>
+    <div class="hdr-sep"></div>
+    <div class="hdr-stat">
+      <span class="hs-num verde">{{ porcentajeGlobal }}%</span>
+      <span class="hs-lbl">Completado</span>
+    </div>
+    <div class="hdr-barra-wrap">
+      <div class="hdr-barra">
+        <div class="hdr-barra-fill" [style.width.%]="porcentajeGlobal"></div>
+      </div>
+      <span class="hdr-barra-txt">{{ totalTengo }} / {{ totalCatalogo }} láminas</span>
+    </div>
+  </div>
+
+</ion-header>
+
+<!-- Confetti -->
+<div class="confetti-overlay" *ngIf="confettiActivo">
+  <div class="confetti-msg">
+    <ion-icon name="trophy-outline"></ion-icon>
+    <span>¡Álbum Completado!</span>
+  </div>
+  <div class="confetti-particles">
+    <span *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]"
+      class="particle" [class]="'p' + i"></span>
+  </div>
+</div>
+
+<ion-content class="paises-content" [class.claro]="modoClaro">
+
+  <!-- Decoración mundialista flotante (detrás del contenido) -->
+  <div class="deco-balon"><img src="assets/balon.png" alt=""></div>
+  <div class="deco-sobres"><img src="assets/sobres.png" alt=""></div>
+
+  <div class="page-inner">
+
+    <div class="buscador-wrap">
+      <ion-searchbar [(ngModel)]="busqueda" (ionInput)="onBusqueda()"
+        placeholder="Buscar selección..." [debounce]="200" class="buscador">
+      </ion-searchbar>
+    </div>
+
+    <div class="controles-row">
+      <div class="zonas-scroll">
+        <button *ngFor="let z of ZONAS" class="zona-btn"
+          [class.activo]="zonaActiva === z" (click)="setZona(z)">{{ z }}</button>
+      </div>
+      <div class="orden-row">
+        <span class="orden-label">Ordenar:</span>
+        <button *ngFor="let o of ORDENES" class="orden-btn"
+          [class.activo]="ordenActivo === o.id" (click)="setOrden(o.id)">{{ o.label }}</button>
+      </div>
+    </div>
+
+    <div class="especiales-card" (click)="abrirEspeciales()">
+      <div class="esp-left">
+        <span class="esp-icono">⭐</span>
+        <div class="esp-info">
+          <span class="esp-titulo">Láminas Especiales</span>
+          <span class="esp-sub">World Cup Trophy · Legends · Future Stars · y más</span>
+        </div>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="esp-chevron"></ion-icon>
+    </div>
+
+    <!-- GRILLA -->
+    <div class="grilla" *ngIf="!vistaLista">
+      <div class="cromo" *ngFor="let p of paisesFiltrados"
+        [ngClass]="claseCromo(p)" (click)="abrirPais(p)">
+        <span class="debut-badge" *ngIf="p.esDebut">DEBUT</span>
+        <div class="flag-container">
+          <img *ngIf="p.flagCode" class="flag-img"
+               [src]="getFlagUrl(p.flagCode)" [alt]="p.nombre"
+               (error)="onFlagError($event, p)">
+          <span *ngIf="!p.flagCode" class="flag-emoji">{{ p.bandera }}</span>
+        </div>
+        <div class="cromo-body">
+          <div class="cromo-nombre">{{ p.nombre }}</div>
+          <div class="cromo-zona-row">
+            <span class="cromo-zona">{{ p.zona }}</span>
+            <span class="cromo-pct" [style.color]="colorBarra(p)">{{ p.porcentaje }}%</span>
+          </div>
+          <div class="barra-wrap">
+            <div class="barra-bg">
+              <div class="barra-fill" [style.width.%]="p.porcentaje" [style.background]="colorBarra(p)"></div>
+            </div>
+          </div>
+          <div class="cromo-footer">
+            <span class="cromo-conteo">{{ p.total }}/{{ p.completado }}</span>
+            <span class="cromo-cambio" *ngIf="p.repetidas > 0">
+              <ion-icon name="repeat-outline"></ion-icon> {{ p.repetidas }}
+            </span>
+            <span class="cromo-completo-badge" *ngIf="p.porcentaje === 100">✦ Completo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTA -->
+    <div class="lista-paises" *ngIf="vistaLista">
+      <div class="lista-item" *ngFor="let p of paisesFiltrados"
+        [ngClass]="claseCromo(p)" (click)="abrirPais(p)">
+        <div class="lista-flag">
+          <img *ngIf="p.flagCode" [src]="getFlagUrl(p.flagCode)" [alt]="p.nombre"
+               (error)="onFlagError($event, p)">
+          <span *ngIf="!p.flagCode">{{ p.bandera }}</span>
+        </div>
+        <div class="lista-info">
+          <span class="lista-nombre">{{ p.nombre }}</span>
+          <span class="lista-zona">{{ p.zona }}
+            <span class="lista-debut" *ngIf="p.esDebut">DEBUT</span>
+          </span>
+        </div>
+        <div class="lista-barra-wrap">
+          <div class="lista-barra-bg">
+            <div class="lista-barra-fill" [style.width.%]="p.porcentaje" [style.background]="colorBarra(p)"></div>
+          </div>
+          <span class="lista-conteo">{{ p.total }}/{{ p.completado }}</span>
+        </div>
+        <div class="lista-pct" [style.color]="colorBarra(p)">{{ p.porcentaje }}%</div>
+        <div class="lista-cambio" *ngIf="p.repetidas > 0">
+          <ion-icon name="repeat-outline"></ion-icon>
+          <span>{{ p.repetidas }}</span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="lista-chevron"></ion-icon>
+      </div>
+    </div>
+
+    <div class="sin-resultados" *ngIf="paisesFiltrados.length === 0">
+      <ion-icon name="search-outline"></ion-icon>
+      <p>Sin resultados para "{{ busqueda }}"</p>
+    </div>
+
+    <!-- Pie oficial -->
+    <div class="footer-panini">
+      <img src="assets/panini-logo.png" alt="Panini" class="footer-panini-img">
+      <span class="footer-txt">Álbum Oficial FIFA World Cup 2026™</span>
+    </div>
+
+  </div>
+</ion-content>

@@ -1,0 +1,109 @@
+<ion-header class="perfil-hdr">
+  <div class="hdr-franja-izq"><div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div></div>
+  <div class="hdr-franja-der"><div class="hf f4"></div><div class="hf f5"></div></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" class="hdr-btn">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <div class="hdr-titulo-wrap">
+      <span class="hdr-titulo">MI PERFIL</span>
+      <span class="hdr-sub">FIFA World Cup 2026 · Álbum Panini</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="perfil-content">
+  <div class="perfil-inner">
+
+    <!-- AVATAR + nombre -->
+    <div class="avatar-section">
+      <div class="avatar-ring">
+        <div class="avatar-circle" [style.background]="gradiente">
+          {{ iniciales }}
+        </div>
+      </div>
+
+      <!-- Nombre editable -->
+      <div class="nombre-wrap" *ngIf="!editando">
+        <h2 class="nombre">{{ usuario.nombre_real || usuario.username }}</h2>
+        <p class="username">&#64;{{ usuario.username }}</p>
+        <button class="btn-editar" (click)="editando=true">
+          <ion-icon name="create-outline"></ion-icon> Editar nombre
+        </button>
+      </div>
+
+      <div class="editar-wrap" *ngIf="editando">
+        <input class="input-nombre" type="text" [(ngModel)]="nuevoNombre"
+               placeholder="Tu nombre completo" (keyup.enter)="guardarNombre()"/>
+        <div class="editar-btns">
+          <button class="btn-cancelar" (click)="editando=false">Cancelar</button>
+          <button class="btn-guardar" (click)="guardarNombre()" [disabled]="cargando">
+            <ion-icon name="checkmark-outline"></ion-icon> Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARRA DE PROGRESO DEL ÁLBUM -->
+    <div class="album-card">
+      <div class="album-card-hdr">
+        <ion-icon name="trophy-outline"></ion-icon>
+        <span>Mi Álbum FIFA 2026</span>
+        <span class="pct-badge" [class.completo]="porcentaje === 100">{{ porcentaje }}%</span>
+      </div>
+      <div class="progreso-barra-bg">
+        <div class="progreso-barra-fill" [style.width]="barraAncho"></div>
+      </div>
+      <p class="progreso-txt">{{ totalTengo }} de {{ totalCatalogo }} láminas</p>
+    </div>
+
+    <!-- STATS 2x2 -->
+    <div class="stats-grid">
+      <div class="stat-card tengo">
+        <ion-icon name="football-outline"></ion-icon>
+        <span class="stat-num">{{ totalTengo }}</span>
+        <span class="stat-lbl">Tengo</span>
+      </div>
+      <div class="stat-card faltan">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        <span class="stat-num">{{ totalFaltantes }}</span>
+        <span class="stat-lbl">Me faltan</span>
+      </div>
+      <div class="stat-card cambio">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <span class="stat-num">{{ totalParaCambiar }}</span>
+        <span class="stat-lbl">Para cambiar</span>
+      </div>
+      <div class="stat-card total">
+        <ion-icon name="trophy-outline"></ion-icon>
+        <span class="stat-num">{{ totalCatalogo }}</span>
+        <span class="stat-lbl">Total álbum</span>
+      </div>
+    </div>
+
+    <!-- Botones de navegación -->
+    <div class="nav-btns">
+      <button class="nav-btn estadisticas" (click)="router.navigate(['/estadisticas'])">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        <span>Estadísticas</span>
+      </button>
+      <button class="nav-btn qr" (click)="router.navigate(['/qr-perfil'])">
+        <ion-icon name="qr-code-outline"></ion-icon>
+        <span>Mi QR</span>
+      </button>
+      <button class="nav-btn deseos" (click)="router.navigate(['/deseos'])">
+        <ion-icon name="heart-outline"></ion-icon>
+        <span>Deseos</span>
+      </button>
+    </div>
+
+    <!-- BOTÓN CERRAR SESIÓN -->
+    <button class="btn-logout" (click)="confirmarSalir()">
+      <ion-icon name="log-out-outline"></ion-icon>
+      Cerrar sesión
+    </button>
+
+  </div>
+</ion-content>

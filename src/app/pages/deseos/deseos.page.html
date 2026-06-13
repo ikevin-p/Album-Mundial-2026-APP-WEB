@@ -1,0 +1,122 @@
+<ion-header class="deseos-hdr">
+  <div class="hdr-franja-izq"><div class="hf f1"></div><div class="hf f2"></div><div class="hf f3"></div></div>
+  <div class="hdr-franja-der"><div class="hf f4"></div><div class="hf f5"></div></div>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" class="hdr-btn"><ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon></ion-button>
+    </ion-buttons>
+    <div class="hdr-titulo-wrap">
+      <span class="hdr-titulo">LISTA DE DESEOS</span>
+      <span class="hdr-sub">Láminas que estás buscando</span>
+    </div>
+  </ion-toolbar>
+
+  <!-- Tabs -->
+  <div class="tabs-row">
+    <button class="tab-btn" [class.activo]="tab === 'deseos'" (click)="tab = 'deseos'">
+      <ion-icon name="heart-outline"></ion-icon>
+      Mis deseos <span class="tab-badge" *ngIf="deseos.length">{{ deseos.length }}</span>
+    </button>
+    <button class="tab-btn" [class.activo]="tab === 'oportunidades'" (click)="tab = 'oportunidades'">
+      <ion-icon name="sparkles-outline"></ion-icon>
+      Disponibles <span class="tab-badge oport" *ngIf="oportunidades.length">{{ oportunidades.length }}</span>
+    </button>
+  </div>
+</ion-header>
+
+<ion-content class="deseos-content">
+  <ion-refresher slot="fixed" (ionRefresh)="cargar($event)"><ion-refresher-content></ion-refresher-content></ion-refresher>
+
+  <div class="deseos-inner">
+
+    <!-- ── TAB: MIS DESEOS ── -->
+    <ng-container *ngIf="tab === 'deseos'">
+
+      <!-- Buscador para agregar -->
+      <div class="buscador-wrap">
+        <div class="buscador-row">
+          <div class="input-busq">
+            <ion-icon name="search-outline"></ion-icon>
+            <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por código o nombre (ej: ARG-10)"
+                   (keyup.enter)="buscarLamina()" autocomplete="off"/>
+          </div>
+          <button class="btn-buscar" (click)="buscarLamina()">
+            <ion-icon name="heart-outline"></ion-icon>
+          </button>
+        </div>
+        <p class="busq-hint">Busca la lámina que te falta y agrégala a tu lista</p>
+      </div>
+
+      <!-- Lista de deseos vacía -->
+      <div class="vacio" *ngIf="deseos.length === 0 && !cargando">
+        <ion-icon name="heart-outline"></ion-icon>
+        <p>Tu lista de deseos está vacía</p>
+        <span>Busca las láminas que te faltan arriba</span>
+      </div>
+
+      <!-- Lista de deseos -->
+      <div class="deseo-lista">
+        <div class="deseo-item" *ngFor="let d of deseos" [class.disponible]="d.disponible_en.length > 0">
+
+          <div class="deseo-info">
+            <span class="deseo-codigo" [class.brillante]="d.lamina.es_lamina_brillante">
+              {{ d.lamina.codigo_lamina }}
+              <span *ngIf="d.lamina.es_lamina_brillante">✨</span>
+            </span>
+            <span class="deseo-jugador">{{ d.lamina.nombre_jugador }}</span>
+            <span class="deseo-pais">{{ d.lamina.pais }}</span>
+          </div>
+
+          <div class="deseo-estado">
+            <span class="badge-disponible" *ngIf="d.disponible_en.length > 0">
+              <ion-icon name="sparkles-outline"></ion-icon>
+              {{ d.disponible_en.length }} coleccionista{{ d.disponible_en.length > 1 ? 's' : '' }} la tiene
+            </span>
+            <span class="badge-buscando" *ngIf="d.disponible_en.length === 0">
+              Buscando...
+            </span>
+          </div>
+
+          <button class="btn-quitar" (click)="quitarDeseo(d)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ── TAB: OPORTUNIDADES ── -->
+    <ng-container *ngIf="tab === 'oportunidades'">
+
+      <div class="vacio" *ngIf="oportunidades.length === 0">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <p>Sin oportunidades por ahora</p>
+        <span>Cuando alguien tenga tus láminas repetidas aparecerán aquí</span>
+      </div>
+
+      <div class="oport-lista">
+        <div class="oport-card" *ngFor="let o of oportunidades">
+          <div class="oport-lamina">
+            <span class="deseo-codigo">{{ o.lamina.codigo_lamina }}</span>
+            <span class="deseo-jugador">{{ o.lamina.nombre_jugador }}</span>
+            <span class="deseo-pais">{{ o.lamina.pais }}</span>
+          </div>
+
+          <div class="oferentes-lista">
+            <div class="oferente-item" *ngFor="let of of o.oferentes">
+              <div class="of-avatar">{{ (of.nombre_real || of.username).substring(0,2).toUpperCase() }}</div>
+              <div class="of-info">
+                <span>{{ of.nombre_real || of.username }}</span>
+                <span class="of-rep">tiene {{ of.cantidad_repetidas }} repetida{{ of.cantidad_repetidas > 1 ? 's' : '' }}</span>
+              </div>
+              <button class="btn-chat" (click)="irAlChat(of.id, of.nombre_real || of.username)">
+                <ion-icon name="chatbubbles-outline"></ion-icon>
+                Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+</ion-content>

@@ -35,3 +35,16 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+// ── Safe Area global — respeta barra de notificaciones Android/iOS ──
+// ion-header ya maneja safe-area automáticamente con translucent,
+// pero forzamos el color de fondo correcto para el área de status bar.
+
+:root {
+  --ion-safe-area-top: env(safe-area-inset-top);
+}
+
+// Header: el toolbar principal recibe el padding del safe area
+ion-header ion-toolbar:first-of-type {
+  padding-top: var(--ion-safe-area-top, 0px);
+}
