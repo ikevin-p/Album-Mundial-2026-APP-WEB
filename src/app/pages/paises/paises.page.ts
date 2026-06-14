@@ -22,6 +22,8 @@ export interface PaisVista extends PaisCatalogo {
   repetidas : number;
   porcentaje: number;
   esDebut   : boolean;
+  // flag de fallback: true cuando la imagen remota falló
+  flagError ?: boolean;
 }
 
 const DEBUTS      = ['Curazao','Cabo Verde','Jordania','Uzbekistan'];
@@ -87,6 +89,8 @@ export class PaisesPage implements ViewWillEnter {
         const repetidas = del_pais.reduce((a, l) => {
           const r = (l.cantidad ?? 0) - 1; return a + (r > 0 ? r : 0);
         }, 0);
+        // Preservar estado de error de imagen si ya se había marcado
+        const existing = this.todosLosPaises.find(x => x.nombre === p.nombre);
         return {
           ...p,
           total     : tengo,
@@ -95,6 +99,7 @@ export class PaisesPage implements ViewWillEnter {
           porcentaje: del_pais.length > 0
             ? Math.round((tengo / del_pais.length) * 100) : 0,
           esDebut   : DEBUTS.includes(p.nombre),
+          flagError : existing?.flagError ?? false,
         };
       });
 
@@ -185,14 +190,24 @@ export class PaisesPage implements ViewWillEnter {
 
   /** Color de la barra y porcentaje según progreso. */
   colorBarra(p: PaisVista): string {
-    if (p.porcentaje === 100) return '#FFC400';  // dorado
-    if (p.porcentaje >= 50)  return '#00E676';  // verde eléctrico
-    if (p.porcentaje > 0)    return '#29B6F6';  // celeste vivo
+    if (p.porcentaje === 100) return '#FFC400';
+    if (p.porcentaje >= 50)  return '#00E676';
+    if (p.porcentaje > 0)    return '#29B6F6';
     return 'rgba(255,255,255,0.10)';
   }
 
-  getFlagUrl(code: string)               : string { return FLAG(code); }
-  onFlagError(event: Event, p: PaisVista): void   { (event.target as HTMLImageElement).style.display='none'; p.flagCode=''; }
+  getFlagUrl(code: string): string { return FLAG(code); }
+
+  /**
+   * Cuando la imagen de bandera falla (sin conexión a flagcdn.com),
+   * marca flagError=true para que el template muestre el emoji de fallback.
+   */
+  onFlagError(event: Event, p: PaisVista): void {
+    (event.target as HTMLImageElement).style.display = 'none';
+    p.flagError = true;
+    p.flagCode  = ''; // activa el *ngIf del span emoji
+  }
+
   setZona(z: string)  : void { this.zonaActiva  = z; this.aplicarFiltros(); }
   setOrden(o: string) : void { this.ordenActivo = o; this.aplicarFiltros(); }
   onBusqueda()        : void { this.aplicarFiltros(); }

@@ -61,6 +61,11 @@ export class AuthService {
   getToken(): string | null       { return localStorage.getItem(this.TOKEN_KEY); }
   isAuthenticated(): boolean      { return !!this.getToken(); }
 
+  // Callback opcional que se ejecuta al cerrar sesión (lo registra
+  // PresenciaService para desconectar el WebSocket). Evita import circular.
+  private onLogout?: () => void;
+  registrarOnLogout(fn: () => void): void { this.onLogout = fn; }
+
   /** ID del usuario autenticado, extraído del claim `sub` del JWT. */
   getUserId(): number {
     const token = this.getToken();
@@ -77,6 +82,7 @@ export class AuthService {
   }
 
   logout(): void {
+    this.onLogout?.(); // desconectar presencia/WebSocket si está registrado
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
   }

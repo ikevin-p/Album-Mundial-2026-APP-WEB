@@ -3,6 +3,6 @@
 // ⚠️  Verificar con ipconfig antes de cada presentación.
 export const environment = {
   production: true,
-  apiUrl   : 'http://192.168.1.20:8000',
-  socketUrl: 'http://192.168.1.20:8000',
+  apiUrl   : 'http://10.127.67.60:8001',
+  socketUrl: 'http://10.127.67.60:8001',
 };

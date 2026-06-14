@@ -6,7 +6,7 @@
   --p-hueso:  #F5F3ED;
 }
 
-// Header con color dinámico del país
+// ══════════ HEADER ══════════
 .jugador-header ion-toolbar {
   --background: var(--fondo, #0A1F44);
   --color: #FFFFFF;
@@ -14,7 +14,7 @@
 }
 
 .titulo {
-  font-family: 'Impact', sans-serif;
+  font-family: 'Impact','Arial Black',sans-serif;
   font-size: 1rem;
   font-weight: 900;
   letter-spacing: 1px;
@@ -25,17 +25,99 @@
   --background: linear-gradient(180deg, #0A1F44 0%, #0D2754 100%);
 }
 
-// Hint de instrucción
+// ══════════ PANEL SUPERIOR ══════════
+.panel-superior {
+  padding: 14px 16px 10px;
+  background: rgba(0,0,0,0.18);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 12px;
+}
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.stat-num {
+  font-family: 'Impact','Arial Black',sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  &.verde  { color: #00E676; }
+  &.rojo   { color: #FF5C6C; }
+  &.dorado { color: #FFC400; }
+}
+.stat-lbl {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(245,243,237,0.5);
+  font-weight: 600;
+}
+
+.prog-barra-bg {
+  height: 7px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.prog-barra-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.8s cubic-bezier(.34,1.2,.64,1);
+  box-shadow: 0 0 8px rgba(0,230,118,0.4);
+}
+
+// BOTÓN GRANDE marcar todas
+.btn-marcar-todas {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  background: linear-gradient(90deg, #006FE6, #29B6F6);
+  color: #fff;
+  font-family: 'Impact','Arial Black',sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  border: none;
+  border-radius: 14px;
+  padding: 13px 18px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,111,230,0.4);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s;
+
+  ion-icon { font-size: 1.3rem; }
+
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.6; cursor: default; }
+
+  &.completo {
+    background: linear-gradient(90deg, #C9A227, #FFD24C);
+    color: #0A1F44;
+    box-shadow: 0 4px 18px rgba(255,210,76,0.5);
+  }
+}
+
+// ══════════ HINT ══════════
 .hint {
   text-align: center;
   padding: 8px 16px;
-  font-size: 0.68rem;
-  color: rgba(245,243,237,0.45);
+  font-size: 0.66rem;
+  color: rgba(245,243,237,0.42);
   letter-spacing: 0.3px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-// Vacío
+// ══════════ VACÍO ══════════
 .vacio {
   text-align: center;
   padding: 80px 30px;
@@ -44,205 +126,238 @@
   p { font-size: 1rem; font-weight: 600; }
 }
 
-// Grid 3 columnas para que quepan más en pantalla
+// ══════════ GRID ══════════
 .grilla {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding: 10px 8px 30px;
+  gap: 9px;
+  padding: 12px 9px 40px;
 }
 
-// Lámina base — sin pegar (gris/apagada)
+// ── Lámina base (sin pegar) ──
 .lamina {
   position: relative;
-  background: #2A3550;
-  border: 2px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 10px 6px 8px;
+  background: #243150;
+  border: 2px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 11px 6px 8px;
   text-align: center;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 140px;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  min-height: 158px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.2s;
   user-select: none;
   -webkit-user-select: none;
-  // Sin pegar: apagada
-  opacity: 0.5;
-  filter: grayscale(0.6);
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0.55;
+  filter: grayscale(0.55);
 }
 
-// Lámina pegada (la tiene)
+// Deseada (sin tener): marco rosado tenue
+.lamina.deseada:not(.pegada) {
+  opacity: 0.8;
+  border-color: rgba(255,77,109,0.45);
+  box-shadow: 0 0 12px rgba(255,77,109,0.2);
+}
+
+// Pegada (la tiene)
 .lamina.pegada {
   background: var(--p-hueso);
   border-color: rgba(255,255,255,0.3);
   opacity: 1;
   filter: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
 }
 
-// Lámina brillante pegada — borde dorado
+// Brillante pegada
 .lamina.brillante.pegada {
   border-color: var(--p-dorado);
   background: linear-gradient(150deg, #FFFDF5 0%, #FFF3C0 100%);
-  box-shadow: 0 0 16px rgba(255,210,76,0.55), 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 0 18px rgba(255,210,76,0.55), 0 4px 12px rgba(0,0,0,0.3);
 }
 
-// Brillante sin pegar — algo de dorado igual
+// Brillante sin pegar
 .lamina.brillante:not(.pegada) {
-  border-color: rgba(255,210,76,0.3);
-  opacity: 0.6;
-  filter: grayscale(0.3);
+  border-color: rgba(255,210,76,0.28);
 }
 
-// Animación de "pegar" — pequeño rebote
+// Animación de pegar
 .lamina.animando {
-  transform: scale(1.06);
-  box-shadow: 0 0 20px rgba(255,210,76,0.5);
+  transform: scale(1.07);
+  box-shadow: 0 0 22px rgba(255,210,76,0.5);
 }
 
-.lamina:active {
-  transform: scale(0.94);
+.lamina:active { transform: scale(0.95); }
+
+// ── Botón de deseo (corazón) ──
+.deseo-btn {
+  position: absolute;
+  top: 5px; left: 5px;
+  z-index: 4;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.3);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s;
+  ion-icon { font-size: 15px; }
+  &:active { transform: scale(0.8); }
 }
 
-// Tag brillante (esquina)
+// ── Tag brillante ──
 .brillo-tag {
   position: absolute;
-  top: 5px;
-  right: 6px;
-  font-size: 0.8rem;
+  top: 6px; right: 7px;
+  font-size: 0.85rem;
   color: var(--p-dorado);
   filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+  z-index: 3;
 }
 
-// Código
+// ── Código ──
 .codigo {
-  font-size: 0.55rem;
+  font-size: 0.56rem;
   font-weight: 800;
   letter-spacing: 0.8px;
   color: #fff;
-  border-radius: 5px;
-  padding: 1px 7px;
-  margin-bottom: 7px;
+  border-radius: 6px;
+  padding: 2px 9px;
+  margin-bottom: 8px;
+  margin-top: 4px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
-// Avatar
+// ── Avatar ──
 .avatar {
-  width: 52px;
-  height: 52px;
+  width: 54px; height: 54px;
   border-radius: 50%;
-  border: 2.5px solid rgba(255,255,255,0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 6px;
+  border: 2.5px solid rgba(255,255,255,0.85);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 7px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-
   span {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 900;
     color: #fff;
     text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    font-family: 'Impact', sans-serif;
+    font-family: 'Impact','Arial Black',sans-serif;
   }
 }
 
-// Nombre
+// ── Nombre ──
 .nombre {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--p-azul);
   line-height: 1.15;
-  margin-bottom: 6px;
-
-  // Cuando no está pegada, usar color claro
-  .lamina:not(.pegada) & {
-    color: rgba(245,243,237,0.7);
-  }
+  margin-bottom: 7px;
+  min-height: 1.7em;
+  display: flex;
+  align-items: center;
+  .lamina:not(.pegada) & { color: rgba(245,243,237,0.72); }
 }
 
-// Estado
+// ── Estado (sin pegar) ──
 .estado {
   margin-top: auto;
   font-size: 0.6rem;
   font-weight: 700;
   color: rgba(245,243,237,0.5);
-  background: rgba(255,255,255,0.08);
-  border-radius: 8px;
-  padding: 3px 8px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 9px;
+  padding: 4px 8px;
   width: 100%;
   text-align: center;
+  &.tiene { color: #fff; background: var(--p-verde); }
+  .deseada-lbl { color: #FF7B8E; }
+}
 
-  &.tiene {
-    color: #fff;
-    background: var(--p-verde);
-  }
-
-  &.repetida {
-    background: var(--p-rojo);
+// ── Controles de repetidas (+/-) ──
+.controles-repe {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+}
+.ctrl-btn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s, background 0.15s;
+  ion-icon { font-size: 17px; color: #fff; }
+  &:active { transform: scale(0.85); }
+  &.menos { background: rgba(230,57,70,0.85); }
+  &.mas   { background: rgba(42,157,92,0.9); }
+}
+.repe-info {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(42,157,92,0.18);
+  &.tiene-repe { background: rgba(255,196,0,0.22); }
+  .repe-ok  { color: #2A9D5C; font-size: 0.95rem; font-weight: 900; }
+  .repe-num {
+    color: #B8860B; font-weight: 900; font-size: 0.78rem;
+    font-family: 'Impact','Arial Black',sans-serif;
   }
 }
 
-// ── MODO SELECCIÓN MÚLTIPLE ──────────────────────────────────
-.btn-multi  { --color: #FFC400; }
-.btn-sel-all { --color: #00E676; }
-.btn-desel  { --color: #FF4D6D; }
+// ══════════ MODO SELECCIÓN ══════════
+.btn-multi    { --color: #FFC400; }
+.btn-sel-all  { --color: #00E676; }
+.btn-desel    { --color: #FF4D6D; }
 .btn-cancelar { --color: rgba(255,255,255,0.7); }
 
 .sel-titulo {
   font-family: 'Impact','Arial Black',sans-serif;
-  font-size: .95rem; font-weight: 900; color: #fff;
+  font-size: 0.95rem; font-weight: 900; color: #fff;
   letter-spacing: 1px; text-align: center;
 }
 
-// Barra de progreso del país
-.pais-progreso {
-  padding: 10px 16px 6px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.prog-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-.prog-txt { font-size: .68rem; color: rgba(245,243,237,.5); }
-.prog-pct { font-family: 'Impact','Arial Black',sans-serif; font-size: .88rem; color: #fff; font-weight: 900; }
-.prog-barra-bg { height: 5px; background: rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
-.prog-barra-fill { height: 100%; border-radius: 4px; transition: width .8s ease; }
-
-// Estado seleccionada
 .lamina.seleccionada {
   border-color: #00E676 !important;
-  box-shadow: 0 0 0 2px rgba(0,230,118,.35), 0 4px 14px rgba(0,0,0,.4) !important;
+  box-shadow: 0 0 0 2px rgba(0,230,118,0.35), 0 4px 14px rgba(0,0,0,0.4) !important;
   opacity: 1 !important;
   filter: none !important;
   transform: scale(1.04);
 }
-
 .lamina.modo-sel {
   cursor: pointer;
-  &:active { transform: scale(.96); }
+  &:active { transform: scale(0.96); }
 }
-
-// Icono de check dentro de la lámina
 .sel-check {
   position: absolute; top: 6px; left: 6px; z-index: 5;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
   display: flex; align-items: center; justify-content: center;
-  ion-icon { font-size: 13px; }
+  ion-icon { font-size: 16px; }
 }
 
-// Botón flotante de confirmación
+// ══════════ FAB CONFIRMAR ══════════
 .fab-confirmar {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 10px; z-index: 999;
   background: linear-gradient(90deg, #00A843, #4CD964);
   color: #fff; font-family: 'Impact','Arial Black',sans-serif;
-  font-size: .9rem; font-weight: 900; letter-spacing: 1px;
+  font-size: 0.9rem; font-weight: 900; letter-spacing: 1px;
   border: none; border-radius: 30px; padding: 14px 28px;
-  box-shadow: 0 6px 28px rgba(0,200,83,.5);
+  box-shadow: 0 6px 28px rgba(0,200,83,0.5);
   cursor: pointer; white-space: nowrap;
-  animation: subirFab .3s cubic-bezier(.34,1.3,.64,1) both;
+  animation: subirFab 0.3s cubic-bezier(.34,1.3,.64,1) both;
   ion-icon { font-size: 20px; }
-  &:active { transform: translateX(-50%) scale(.96); }
+  &:active { transform: translateX(-50%) scale(0.96); }
 }
-@keyframes subirFab { from { bottom: -60px; opacity: 0; } to { bottom: 24px; opacity: 1; } }
+@keyframes subirFab {
+  from { bottom: -60px; opacity: 0; }
+  to   { bottom: 24px;  opacity: 1; }
+}

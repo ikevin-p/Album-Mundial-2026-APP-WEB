@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Permite tráfico HTTP (cleartext) hacia la PC del backend en la red local.
+  Necesario porque el backend corre en http:// (no https://) durante desarrollo
+  y demos. Android 9+ bloquea cleartext por defecto sin esta config.
+-->
+<network-security-config>
+    <!-- Permite cleartext a la IP del backend en el hotspot/WiFi local -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.127.67.60</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
+    <!-- Fallback general para redes locales privadas durante desarrollo -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

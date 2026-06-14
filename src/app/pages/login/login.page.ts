@@ -9,6 +9,7 @@ import {
   alertCircleOutline, reloadOutline, closeOutline, mailOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
+import { PresenciaService } from '../../services/presencia.service';
 
 @Component({
   selector   : 'app-login',
@@ -42,7 +43,11 @@ export class LoginPage {
     return `left:${left}%;top:${top}%;width:${size}px;height:${size * 0.5}px;background:${color};opacity:${opacity};transform:rotate(${rotate}deg)`;
   });
 
-  constructor(private auth: AuthService, private router: Router) {
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private presencia: PresenciaService,
+  ) {
     addIcons({
       personOutline, lockClosedOutline, eyeOutline, eyeOffOutline,
       alertCircleOutline, reloadOutline, closeOutline, mailOutline,
@@ -54,6 +59,9 @@ export class LoginPage {
     this.cargando = true; this.errorMsg = '';
     this.auth.login(this.username, this.password).subscribe({
       next : () => {
+        // Conectar presencia global: aparecer en línea + recibir
+        // notificaciones en vivo desde cualquier pantalla.
+        this.presencia.reiniciar();
         const destino = localStorage.getItem('onboarding_done') ? '/paises' : '/onboarding';
         this.router.navigate([destino]);
       },
@@ -76,7 +84,10 @@ export class LoginPage {
     this.googleCargando = true;
     this.googleError    = '';
     this.auth.loginConGoogle(email).subscribe({
-      next : () => this.router.navigate(['/paises']),
+      next : () => {
+        this.presencia.reiniciar();
+        this.router.navigate(['/paises']);
+      },
       error: (e: Error) => {
         this.googleError    = e.message.includes('Gmail') ? e.message : 'Ingresa un correo Gmail válido';
         this.googleCargando = false;

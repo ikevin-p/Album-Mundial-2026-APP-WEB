@@ -10,6 +10,7 @@
         <span class="titulo">{{ pais?.bandera }} {{ paisNombre }}</span>
       </ion-title>
       <ion-buttons slot="end">
+        <!-- Botón selección múltiple manual -->
         <ion-button (click)="activarModoSeleccion()" class="btn-multi" title="Selección múltiple">
           <ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
         </ion-button>
@@ -27,11 +28,11 @@
         <span>{{ seleccionados.size }} seleccionada{{ seleccionados.size !== 1 ? 's' : '' }}</span>
       </div>
       <ion-buttons slot="end">
-        <ion-button (click)="deseleccionarTodas()" *ngIf="seleccionados.size > 0" class="btn-desel">
-          <ion-icon slot="icon-only" name="heart-dislike-outline"></ion-icon>
+        <ion-button (click)="deseleccionarTodas()" *ngIf="seleccionados.size > 0" class="btn-desel" title="Limpiar">
+          <ion-icon slot="icon-only" name="close-outline"></ion-icon>
         </ion-button>
-        <ion-button (click)="seleccionarTodas()" class="btn-sel-all">
-          <ion-icon slot="icon-only" name="heart-outline"></ion-icon>
+        <ion-button (click)="seleccionarTodas()" class="btn-sel-all" title="Seleccionar todas">
+          <ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
         </ion-button>
       </ion-buttons>
     </ng-container>
@@ -41,24 +42,53 @@
 
 <ion-content class="jugadores-content">
 
-  <!-- Progreso del país -->
-  <div class="pais-progreso" *ngIf="jugadores.length > 0">
-    <div class="prog-info">
-      <span class="prog-txt">{{ totalTengo }} / {{ totalLaminas }} láminas</span>
-      <span class="prog-pct">{{ pctCompletado }}%</span>
+  <!-- ══════════ PANEL DE PROGRESO + ACCIONES RÁPIDAS ══════════ -->
+  <div class="panel-superior" *ngIf="jugadores.length > 0 && !modoSeleccion">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-num verde">{{ totalTengo }}</span>
+        <span class="stat-lbl">Tengo</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num rojo">{{ totalLaminas - totalTengo }}</span>
+        <span class="stat-lbl">Faltan</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num dorado">{{ totalRepetidas }}</span>
+        <span class="stat-lbl">Repes</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num">{{ pctCompletado }}%</span>
+        <span class="stat-lbl">Completo</span>
+      </div>
     </div>
+
+    <!-- Barra de progreso -->
     <div class="prog-barra-bg">
       <div class="prog-barra-fill"
            [style.width]="pctCompletado + '%'"
            [style.background]="pctCompletado === 100 ? '#FFC400' : (pctCompletado >= 50 ? '#00E676' : '#29B6F6')">
       </div>
     </div>
+
+    <!-- BOTÓN GRANDE: Marcar todas de un golpe -->
+    <button class="btn-marcar-todas"
+            [class.completo]="todasConseguidas"
+            [disabled]="guardando"
+            (click)="marcarTodasDirecto()">
+      <ion-icon [name]="todasConseguidas ? 'checkmark-circle' : 'checkmark-done-outline'"></ion-icon>
+      <span *ngIf="!guardando && !todasConseguidas">Marcar todas como conseguidas</span>
+      <span *ngIf="!guardando && todasConseguidas">¡{{ paisNombre }} completo!</span>
+      <span *ngIf="guardando">Guardando...</span>
+    </button>
   </div>
 
   <!-- Instrucción contextual -->
   <div class="hint" *ngIf="jugadores.length > 0">
-    <span *ngIf="!modoSeleccion">Toca para marcar · Mantén presionado para selección múltiple</span>
-    <span *ngIf="modoSeleccion">Selecciona las láminas que conseguiste · ❤️ = seleccionar todas las que faltan</span>
+    <span *ngIf="!modoSeleccion">Toca para marcar · Mantén presionado para más opciones</span>
+    <span *ngIf="modoSeleccion">Toca las láminas que conseguiste · botón ✓✓ = todas</span>
   </div>
 
   <!-- Vacío -->
@@ -67,7 +97,7 @@
     <p>Sin láminas de {{ paisNombre }}</p>
   </div>
 
-  <!-- Grid de láminas -->
+  <!-- ══════════ GRID DE LÁMINAS ══════════ -->
   <div class="grilla" *ngIf="jugadores.length > 0">
     <div
       *ngFor="let j of jugadores; trackBy: trackById"
@@ -77,18 +107,27 @@
       [class.animando]="animando.has(j.id!)"
       [class.seleccionada]="estaSeleccionada(j)"
       [class.modo-sel]="modoSeleccion"
+      [class.deseada]="esDeseada(j)"
       (click)="onTap(j)"
       (mousedown)="onPressStart(j)"
       (mouseup)="onPressEnd(j)"
+      (mouseleave)="onPressEnd(j)"
       (touchstart)="onPressStart(j)"
       (touchend)="onPressEnd(j)"
     >
-      <!-- Check de selección -->
+      <!-- Check de selección (modo masivo) -->
       <div class="sel-check" *ngIf="modoSeleccion">
-        <ion-icon [name]="estaSeleccionada(j) ? 'checkmark-done-outline' : 'heart-outline'"
-                  [style.color]="estaSeleccionada(j) ? '#00E676' : 'rgba(255,255,255,0.3)'">
+        <ion-icon [name]="estaSeleccionada(j) ? 'checkmark-circle' : 'ellipse-outline'"
+                  [style.color]="estaSeleccionada(j) ? '#00E676' : 'rgba(255,255,255,0.4)'">
         </ion-icon>
       </div>
+
+      <!-- Corazón de deseada (esquina sup izq, fuera de modo selección) -->
+      <button class="deseo-btn" *ngIf="!modoSeleccion && !tieneLamina(j)"
+              (click)="toggleDeseo(j, $event)" title="Marcar como deseada">
+        <ion-icon [name]="esDeseada(j) ? 'heart' : 'heart-outline'"
+                  [style.color]="esDeseada(j) ? '#FF4D6D' : 'rgba(255,255,255,0.45)'"></ion-icon>
+      </button>
 
       <!-- Insignia brillante -->
       <span class="brillo-tag" *ngIf="esBrillante(j)">✦</span>
@@ -107,11 +146,33 @@
       <!-- Nombre -->
       <div class="nombre">{{ j.nombre_jugador }}</div>
 
-      <!-- Estado -->
-      <div class="estado" [class.tiene]="tieneLamina(j)" [class.repetida]="(j.cantidad ?? 0) > 1">
+      <!-- Estado / Controles -->
+      <ng-container *ngIf="!modoSeleccion">
+        <!-- Si NO la tiene: estado simple -->
+        <div class="estado" *ngIf="!tieneLamina(j)">
+          <span *ngIf="esDeseada(j)" class="deseada-lbl">❤ La quiero</span>
+          <span *ngIf="!esDeseada(j)">Sin pegar</span>
+        </div>
+
+        <!-- Si la tiene: controles de repetidas +/- -->
+        <div class="controles-repe" *ngIf="tieneLamina(j)">
+          <button class="ctrl-btn menos" (click)="restarRepetida(j, $event)">
+            <ion-icon name="remove-outline"></ion-icon>
+          </button>
+          <div class="repe-info" [class.tiene-repe]="repetidasDe(j) > 0">
+            <span *ngIf="repetidasDe(j) === 0" class="repe-ok">✔</span>
+            <span *ngIf="repetidasDe(j) > 0" class="repe-num">×{{ j.cantidad }}</span>
+          </div>
+          <button class="ctrl-btn mas" (click)="sumarRepetida(j, $event)">
+            <ion-icon name="add-outline"></ion-icon>
+          </button>
+        </div>
+      </ng-container>
+
+      <!-- En modo selección: solo estado -->
+      <div class="estado" *ngIf="modoSeleccion" [class.tiene]="tieneLamina(j)">
         <span *ngIf="!tieneLamina(j)">Sin pegar</span>
-        <span *ngIf="tieneLamina(j) && (j.cantidad ?? 0) <= 1">✔ La tengo</span>
-        <span *ngIf="(j.cantidad ?? 0) > 1">🔄 ×{{ j.cantidad }}</span>
+        <span *ngIf="tieneLamina(j)">✔ La tengo</span>
       </div>
     </div>
   </div>

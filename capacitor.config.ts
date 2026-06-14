@@ -1,16 +1,19 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId  : 'io.ionic.starter',
-  appName: 'albumApp',
+  appId  : 'io.ionic.albumfifa',
+  appName: 'AlbumFIFA',
   webDir : 'www',
   server : {
     androidScheme: 'http',
     cleartext    : true,
   },
   plugins: {
+    // CapacitorHttp DESACTIVADO: interceptaba las peticiones y rompía
+    // el flujo JWT del interceptor de Angular. Con esto, la app usa el
+    // fetch nativo del WebView (igual que el navegador, que sí funciona).
     CapacitorHttp: {
-      enabled: true,
+      enabled: false,
     },
     // Status bar: fondo azul marino del header, sin solaparse con el contenido
     StatusBar: {

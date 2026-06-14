@@ -3,6 +3,8 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 import { NotificacionService } from './services/notificacion.service';
+import { PresenciaService } from './services/presencia.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector  : 'app-root',
@@ -11,7 +13,11 @@ import { NotificacionService } from './services/notificacion.service';
   imports   : [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-  constructor(private notifSvc: NotificacionService) {
+  constructor(
+    private notifSvc    : NotificacionService,
+    private presenciaSvc: PresenciaService,
+    private auth        : AuthService,
+  ) {
     this.initApp();
   }
 
@@ -24,7 +30,13 @@ export class AppComponent {
         await StatusBar.setBackgroundColor({ color: '#071020' });
       } catch {}
     }
-    // Solicitar permisos de notificaciones al arrancar
+    // Permisos de notificaciones
     await this.notifSvc.init();
+
+    // Si ya hay sesión activa (token guardado), conectar presencia global
+    // para aparecer en línea y recibir notificaciones en cualquier pantalla.
+    if (this.auth.isAuthenticated()) {
+      this.presenciaSvc.iniciar();
+    }
   }
 }
