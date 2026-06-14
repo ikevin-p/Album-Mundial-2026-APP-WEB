@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+env/
+
+# Base de datos (datos locales, no subir)
+mundial.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# Docker volumes
+.docker/

@@ -1,0 +1,23 @@
+# docker-compose.yml — Álbum Mundial 2026
+# Levanta el backend en el puerto 8000 con base de datos persistente.
+# Uso:  docker compose up -d --build
+# Logs: docker compose logs -f
+# Bajar: docker compose down   (la BD persiste en ./data)
+
+services:
+  backend:
+    build: .
+    container_name: album-mundial-api
+    ports:
+      - "8000:8000"
+    environment:
+      # La BD vive en el volumen ./data (sobrevive a rebuilds del contenedor)
+      - DATABASE_URL=sqlite:////app/data/mundial.db
+      # Ollama corre en el host Windows, no dentro del contenedor
+      - OLLAMA_URL=http://host.docker.internal:11434/api/chat
+    volumes:
+      - ./data:/app/data
+    extra_hosts:
+      # Garantiza que host.docker.internal resuelva en Linux containers
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

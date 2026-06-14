@@ -1,0 +1,12 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: album_mundial_backend
+    network_mode: host
+    volumes:
+      - ./backend/mundial.db:/app/mundial.db
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
