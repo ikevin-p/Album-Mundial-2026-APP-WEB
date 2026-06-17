@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, func
 from app.deps import get_db, get_current_user
 from app.models import Mensaje, SalaChat, SalaParticipante, User
+from app.routers.chat.contexto import datos_coleccion
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
@@ -74,12 +75,19 @@ def historial_p2p(destinatario_id: int, db: Session = Depends(get_db), yo: User 
     } for m in msgs]
 
 
-@router.delete("/historial/{destinatario_id}", summary="Borrar historial P2P")
+@router.delete("/historial/{destinatario_id}", summary="Borrar chat P2P")
 def borrar_historial(destinatario_id: int, db: Session = Depends(get_db), yo: User = Depends(get_current_user)):
+    """
+    Borra el CHAT COMPLETO con el destinatario: mensajes, participantes y la
+    propia sala. Así la conversación desaparece de la lista. Si la otra persona
+    vuelve a escribir, `_get_or_create_sala` recrea la sala vacía desde cero.
+    """
     ids  = sorted([yo.id, destinatario_id])
     sala = db.query(SalaChat).filter(SalaChat.sala_key == f"{ids[0]}_{ids[1]}").first()
     if sala:
         db.query(Mensaje).filter(Mensaje.sala_id == sala.id).delete()
+        db.query(SalaParticipante).filter(SalaParticipante.sala_id == sala.id).delete()
+        db.delete(sala)
         db.commit()
     return {"ok": True}
 
@@ -91,6 +99,13 @@ def borrar_historial_bot(db: Session = Depends(get_db), yo: User = Depends(get_c
         db.query(Mensaje).filter(Mensaje.sala_id == sala.id).delete()
         db.commit()
     return {"ok": True}
+
+
+@router.get("/resumen-bot", summary="Resumen de colección para la bienvenida y sugerencias")
+def resumen_bot(db: Session = Depends(get_db), yo: User = Depends(get_current_user)):
+    """Datos estructurados del estado del álbum del usuario: progreso, faltantes,
+    repetidas y brillantes. Alimenta el saludo proactivo y los chips dinámicos."""
+    return datos_coleccion(db, yo.id)
 
 
 @router.get("/historial-bot")

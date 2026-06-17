@@ -8,7 +8,8 @@ from datetime import datetime
 from app.database import SessionLocal
 from app.models import Mensaje, SalaChat, SalaParticipante, User
 from app.security import decode_token
-from app.routers.chat.chatbot import obtener_respuesta_bot
+from app.routers.chat.chatbot import stream_respuesta_bot
+from app.routers.chat.contexto import resumen_coleccion
 
 # ── Servidor Socket.io asíncrono ───────────────────────────────────────────────
 sio = socketio.AsyncServer(
@@ -20,6 +21,10 @@ sio = socketio.AsyncServer(
 
 # Mapa en memoria: socket_id → user_id (se limpia en disconnect)
 sesiones_activas: dict[str, int] = {}
+
+# Banderas de cancelación del bot por socket_id. Si está en True, el stream
+# en curso para esa sesión se corta en la próxima iteración.
+bot_cancelado: dict[str, bool] = {}
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -78,6 +83,7 @@ async def connect(sid: str, environ: dict, auth: dict):
 async def disconnect(sid: str):
     """Marca al usuario como desconectado, guarda último visto y anuncia."""
     uid = sesiones_activas.pop(sid, None)
+    bot_cancelado.pop(sid, None)  # limpiamos la bandera de cancelación
     if uid:
         # Si el usuario tiene otra pestaña/dispositivo conectado, sigue en línea
         sigue_conectado = uid in sesiones_activas.values()
@@ -164,6 +170,23 @@ async def manejar_mensaje(sid: str, data: dict):
         db.close()
 
 
+@sio.on("reaccionar")
+async def reaccionar(sid: str, data: dict):
+    """Retransmite una reacción emoji a un mensaje, en tiempo real.
+    data: { destinatario_id: int, mensaje_id: int, emoji: str }
+    No se persiste en BD: es un realce visual efímero de la conversación."""
+    uid = sesiones_activas.get(sid)
+    destino = data.get("destinatario_id")
+    mensaje_id = data.get("mensaje_id")
+    emoji = (data.get("emoji") or "").strip()
+    if not uid or not destino or not mensaje_id or not emoji:
+        return
+    payload = {"mensaje_id": mensaje_id, "emoji": emoji, "de_usuario": uid}
+    # Eco al emisor (para que vea su propia reacción) y al destinatario.
+    await sio.emit("reaccion", payload, to=sid)
+    await sio.emit("reaccion", payload, room=f"user_{destino}")
+
+
 @sio.on("marcar_leidos")
 async def marcar_leidos(sid: str, data: dict):
     """Marca como leídos los mensajes recibidos de un usuario.
@@ -190,6 +213,12 @@ async def marcar_leidos(sid: str, data: dict):
 
 
 # ── Chatbot ────────────────────────────────────────────────────────────────────
+
+@sio.on("detener_bot")
+async def detener_bot(sid: str, data: dict):
+    """Marca la generación del bot como cancelada para esta sesión."""
+    bot_cancelado[sid] = True
+
 
 @sio.on("mensaje_al_bot")
 async def manejar_bot(sid: str, data: dict):
@@ -231,16 +260,39 @@ async def manejar_bot(sid: str, data: dict):
             for m in reversed(historial_raw)
         ]
 
-        respuesta = await obtener_respuesta_bot(contenido, historial)
+        # Resumen REAL de la colección del usuario, para respuestas personalizadas.
+        contexto = resumen_coleccion(db, uid)
 
-        msg_bot = Mensaje(sala_id=sala.id, remitente_id=None, contenido=respuesta, es_del_bot=True)
+        # ── STREAMING: emitimos cada fragmento a medida que el modelo lo genera ──
+        # El front va concatenando 'bot_chunk' para mostrar la respuesta en vivo.
+        bot_cancelado[sid] = False  # reiniciamos la bandera para esta generación
+        respuesta_completa = ""
+        primer_chunk = True
+        async for fragmento in stream_respuesta_bot(contenido, historial, contexto):
+            # Si el usuario pulsó "detener", cortamos el stream.
+            if bot_cancelado.get(sid):
+                break
+            if primer_chunk:
+                # Al llegar el primer token cortamos el indicador "escribiendo":
+                # ya hay contenido visible apareciendo.
+                await sio.emit("bot_escribiendo", {"escribiendo": False}, to=sid)
+                primer_chunk = False
+            respuesta_completa += fragmento
+            await sio.emit("bot_chunk", {"fragmento": fragmento}, to=sid)
+
+        await sio.emit("bot_escribiendo", {"escribiendo": False}, to=sid)
+        respuesta_completa = respuesta_completa.strip()
+
+        # Persistimos la respuesta final ya completa.
+        msg_bot = Mensaje(sala_id=sala.id, remitente_id=None, contenido=respuesta_completa, es_del_bot=True)
         db.add(msg_bot)
         db.commit()
         db.refresh(msg_bot)
 
-        await sio.emit("bot_escribiendo", {"escribiendo": False}, to=sid)
-        await sio.emit("respuesta_bot", {
-            "contenido"  : respuesta,
+        # 'bot_fin' cierra el mensaje en el front (fija el contenido definitivo
+        # y su timestamp). Mantiene 'respuesta_bot' por compatibilidad histórica.
+        await sio.emit("bot_fin", {
+            "contenido"  : respuesta_completa,
             "enviado_en" : msg_bot.enviado_en.isoformat(),
         }, to=sid)
     finally:
