@@ -62,6 +62,15 @@ export class ChatP2pPage implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
   private typingTimer: any = null;
 
+  // ── Reacciones emoji ──
+  readonly EMOJIS = ['👍', '⚽', '🔥', '😂', '🎉', '😮'];
+  reaccionesPorMsg: { [mensajeId: number]: string } = {};  // mensaje_id → emoji
+  pickerAbiertoId: number | null = null;                   // mensaje con picker abierto
+
+  // ── Celebración de intercambio ──
+  celebrando = false;
+  confetis: { left: number; delay: number; color: string }[] = [];
+
   constructor(
     private route   : ActivatedRoute,
     private router  : Router,
@@ -112,6 +121,11 @@ export class ChatP2pPage implements OnInit, OnDestroy {
 
     this.subs.push(this.chatSvc.conexion$.subscribe(v => this.conectado = v));
 
+    // Reacciones entrantes (en tiempo real)
+    this.subs.push(this.chatSvc.reacciones$.subscribe(r => {
+      this.reaccionesPorMsg[r.mensaje_id] = r.emoji;
+    }));
+
     // Presencia del otro
     this.subs.push(this.chatSvc.estadoUsuarios$.subscribe(e => {
       if (e.user_id === this.otroId) this.otroOnline = e.en_linea;
@@ -139,6 +153,7 @@ export class ChatP2pPage implements OnInit, OnDestroy {
     this.subs.push(this.chatSvc.propuestaRespondida$.subscribe((p: Intercambio) => {
       if (p.receptor.id === this.otroId || p.proponente.id === this.otroId) {
         this.cargarIntercambios();
+        if (p.estado === 'aceptado') this.lanzarCelebracion();
         if (p.estado === 'aceptado' && p.receptor.id === this.otroId) {
           this.notifSvc.notificarIntercambioAceptado(
             p.receptor.nombre_real || p.receptor.username,
@@ -226,6 +241,7 @@ export class ChatP2pPage implements OnInit, OnDestroy {
     this.interSvc.responder(p.id, aceptar).subscribe({
       next : () => {
         this.pendienteRecibida = null;
+        if (aceptar) this.lanzarCelebracion();
         this.mostrarToast(
           aceptar ? `✅ ¡Trato hecho! Recibiste ${p.lamina_ofrecida.codigo_lamina}` : 'Propuesta rechazada',
           aceptar ? 'success' : 'medium');
@@ -235,6 +251,35 @@ export class ChatP2pPage implements OnInit, OnDestroy {
         this.mostrarToast(e?.error?.detail || 'La propuesta ya no está disponible', 'danger');
       },
     });
+  }
+
+  // ── Reacciones ────────────────────────────────────────────────────────────
+  // Abre/cierra el selector de emojis para un mensaje.
+  togglePicker(m: MensajeChat): void {
+    const id = m.id ?? 0;
+    this.pickerAbiertoId = this.pickerAbiertoId === id ? null : id;
+  }
+
+  // Aplica una reacción: se ve al instante y se envía al otro usuario.
+  reaccionar(m: MensajeChat, emoji: string): void {
+    const id = m.id ?? 0;
+    if (!id) return;
+    this.reaccionesPorMsg[id] = emoji;
+    this.pickerAbiertoId = null;
+    this.chatSvc.reaccionar(this.otroId, id, emoji);
+  }
+
+  // ── Celebración (confeti) al cerrar un intercambio ────────────────────────
+  lanzarCelebracion(): void {
+    const colores = ['#F5C842', '#00C853', '#1565C0', '#E8003D', '#fff'];
+    // 36 confetis con posición, color y retardo aleatorios.
+    this.confetis = Array.from({ length: 36 }, () => ({
+      left : Math.random() * 100,
+      delay: Math.random() * 0.5,
+      color: colores[Math.floor(Math.random() * colores.length)],
+    }));
+    this.celebrando = true;
+    setTimeout(() => (this.celebrando = false), 2600);
   }
 
   // ── Helpers UI ────────────────────────────────────────────────────────────

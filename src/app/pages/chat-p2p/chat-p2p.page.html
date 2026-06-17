@@ -35,6 +35,18 @@
 
 <ion-content class="p2p-content" [class.con-fondo]="true">
 
+  <!-- Celebración: confeti + cartel al cerrar un intercambio -->
+  <div class="celebracion" *ngIf="celebrando">
+    <div class="confeti" *ngFor="let c of confetis"
+         [style.left.%]="c.left"
+         [style.animation-delay.s]="c.delay"
+         [style.background]="c.color"></div>
+    <div class="celebracion-cartel">
+      <ion-icon name="swap-horizontal-outline"></ion-icon>
+      <span>¡Trato cerrado! 🎉</span>
+    </div>
+  </div>
+
   <!-- BANNER: propuesta RECIBIDA pendiente -->
   <div class="banner-propuesta recibida" *ngIf="pendienteRecibida">
     <div class="bp-head">
@@ -92,13 +104,26 @@
 
       <!-- Burbuja normal -->
       <div class="burbuja-wrap" *ngIf="!m.es_sistema" [class.mia]="m.es_mio">
-        <div class="burbuja" [class.mia]="m.es_mio">
+        <div class="burbuja" [class.mia]="m.es_mio"
+             (dblclick)="togglePicker(m)">
           <p>{{ m.contenido }}</p>
           <span class="burbuja-meta">
             {{ hora(m.enviado_en) }}
             <ion-icon name="checkmark-done-outline" *ngIf="m.es_mio"
               [class.leido]="m.leido"></ion-icon>
           </span>
+
+          <!-- Reacción aplicada al mensaje -->
+          <span class="reaccion-chip" *ngIf="reaccionesPorMsg[m.id ?? 0]"
+                [class.mia]="m.es_mio">
+            {{ reaccionesPorMsg[m.id ?? 0] }}
+          </span>
+
+          <!-- Selector de emojis (doble-tap para abrir) -->
+          <div class="emoji-picker" *ngIf="pickerAbiertoId === (m.id ?? 0)"
+               [class.mia]="m.es_mio">
+            <button *ngFor="let e of EMOJIS" (click)="reaccionar(m, e)">{{ e }}</button>
+          </div>
         </div>
       </div>
 

@@ -62,8 +62,9 @@ export class LoginPage {
         // Conectar presencia global: aparecer en línea + recibir
         // notificaciones en vivo desde cualquier pantalla.
         this.presencia.reiniciar();
-        const destino = localStorage.getItem('onboarding_done') ? '/paises' : '/onboarding';
-        this.router.navigate([destino]);
+        // Las instrucciones (onboarding) se muestran SIEMPRE tras iniciar
+        // sesión, incluso para cuentas existentes.
+        this.router.navigate(['/onboarding']);
       },
       error: () => { this.errorMsg = 'Credenciales incorrectas'; this.cargando = false; },
     });
@@ -86,7 +87,7 @@ export class LoginPage {
     this.auth.loginConGoogle(email).subscribe({
       next : () => {
         this.presencia.reiniciar();
-        this.router.navigate(['/paises']);
+        this.router.navigate(['/onboarding']);
       },
       error: (e: Error) => {
         this.googleError    = e.message.includes('Gmail') ? e.message : 'Ingresa un correo Gmail válido';

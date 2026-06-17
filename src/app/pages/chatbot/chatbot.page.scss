@@ -65,17 +65,28 @@
 
 // ── CONTENT ─────────────────────────────────────────────────────
 .bot-content {
+  // Fondo IA: navy profundo con halo violeta-tecnologico. Sutil, no estorba la lectura.
   --background: #0A1322;
+  background-color: #0A1322;
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(245,200,66,.05) 0%, transparent 30%),
-    radial-gradient(circle at 80% 70%, rgba(21,101,192,.05) 0%, transparent 28%),
-    radial-gradient(circle at 45% 95%, rgba(0,200,83,.04) 0%, transparent 25%);
+    // halos de color (muy tenues)
+    radial-gradient(circle at 18% 12%, rgba(124,92,255,.10) 0%, transparent 32%),
+    radial-gradient(circle at 85% 18%, rgba(245,200,66,.06) 0%, transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(21,101,192,.08) 0%, transparent 38%),
+    // textura de hexagonos finos (patron tecnologico apenas visible)
+    linear-gradient(60deg, rgba(255,255,255,.015) 25%, transparent 25.5%, transparent 75%, rgba(255,255,255,.015) 75%),
+    linear-gradient(-60deg, rgba(255,255,255,.015) 25%, transparent 25.5%, transparent 75%, rgba(255,255,255,.015) 75%),
+    // gradiente base de profundidad
+    linear-gradient(160deg, #0B1426 0%, #0A1322 50%, #080F1C 100%);
+  background-size: auto, auto, auto, 26px 45px, 26px 45px, 100% 100%;
+  background-attachment: fixed; // el fondo no "salta" al hacer scroll
 }
 
 .mensajes-wrap {
   display: flex; flex-direction: column;
   padding: 14px 14px 18px;
   max-width: 860px; margin: 0 auto; width: 100%;
+  position: relative; z-index: 1;  // por encima del fondo animado
 }
 
 // ── BIENVENIDA ──────────────────────────────────────────────────
@@ -238,4 +249,252 @@
   display: flex; align-items: center; justify-content: center; gap: 5px;
   font-size: .62rem; color: #FF7B8A; padding-top: 6px;
   ion-icon { font-size: 13px; }
+}
+
+// ── Markdown, cursor y acciones por mensaje (Panini Pal) ────────
+.burbuja-col {
+  display: flex; flex-direction: column;
+  max-width: 78%;
+  .burbuja { max-width: 100%; }
+}
+
+// Render de markdown dentro de la burbuja del bot
+.md {
+  font-size: .88rem; line-height: 1.5; color: #EEF2FF; word-break: break-word;
+
+  strong { color: #F5C842; font-weight: 700; }
+  em     { color: #EEF2FF; font-style: italic; opacity: .92; }
+
+  code {
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(245,200,66,.2);
+    border-radius: 5px; padding: 1px 5px;
+    font-family: 'Courier New', monospace; font-size: .8rem;
+    color: #FFD971;
+  }
+
+  ul { margin: 6px 0 2px; padding-left: 6px; list-style: none; }
+  li {
+    position: relative; padding-left: 16px; margin: 3px 0;
+    &::before {
+      content: '⚽'; position: absolute; left: 0; top: 0;
+      font-size: .7rem;
+    }
+  }
+
+  br { line-height: 1.5; }
+}
+
+// Cursor de escritura tipo IA (parpadea mientras llega el texto)
+.cursor-ia {
+  display: inline-block; width: 8px; height: 15px;
+  vertical-align: text-bottom; margin-left: 2px;
+  background: #F5C842; border-radius: 2px;
+  animation: parpadeoCursor .9s steps(2) infinite;
+}
+@keyframes parpadeoCursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+// Barra de acciones bajo la respuesta del bot
+.msg-acciones {
+  display: flex; gap: 4px; margin: 3px 0 6px 4px;
+}
+.acc-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(245,200,66,.18);
+  border-radius: 8px; cursor: pointer;
+  color: rgba(245,200,66,.7); transition: all .15s;
+  ion-icon { font-size: 14px; }
+  &:hover  { background: rgba(245,200,66,.14); color: #F5C842; }
+  &:active { transform: scale(.9); }
+  &:disabled { opacity: .3; cursor: default; }
+}
+
+// Botón detener (reemplaza enviar mientras genera)
+.btn-detener {
+  background: linear-gradient(135deg, #C62828, #E8003D) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(232,0,61,.4) !important;
+  animation: pulsoDetener 1.4s ease-in-out infinite;
+}
+@keyframes pulsoDetener {
+  0%,100% { box-shadow: 0 4px 16px rgba(232,0,61,.4); }
+  50%     { box-shadow: 0 4px 22px rgba(232,0,61,.7); }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  MEJORAS VISUALES — animaciones suaves + efecto lamina brillante
+// ════════════════════════════════════════════════════════════════
+
+// ── Entrada suave de cada burbuja ───────────────────────────────
+.burbuja-wrap {
+  animation: aparecerBurbuja .35s cubic-bezier(.22,1,.36,1);
+}
+@keyframes aparecerBurbuja {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+// ── Efecto destello para codigos de lamina brillante ────────────
+// El bot puede envolver codigos especiales con <span class="lamina-brillante">ARG-01</span>
+// y se veran con brillo dorado animado.
+.md .lamina-brillante,
+.lamina-brillante {
+  display: inline-block;
+  font-weight: 900;
+  padding: 1px 8px;
+  border-radius: 6px;
+  color: #1A1206;
+  background: linear-gradient(110deg, #D4A017 0%, #F5C842 35%, #FFF4C2 50%, #F5C842 65%, #D4A017 100%);
+  background-size: 220% 100%;
+  box-shadow: 0 0 10px rgba(245,200,66,.45), inset 0 1px 1px rgba(255,255,255,.6);
+  animation: brilloLamina 2.4s linear infinite;
+  letter-spacing: .5px;
+}
+@keyframes brilloLamina {
+  0%   { background-position: 220% 0; }
+  100% { background-position: -20% 0; }
+}
+
+// Codigo de lamina normal (no brillante): estilo discreto tipo etiqueta
+.md .lamina-normal,
+.lamina-normal {
+  display: inline-block;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 6px;
+  color: #cfe0ff;
+  background: rgba(21,101,192,.18);
+  border: 1px solid rgba(21,101,192,.35);
+  letter-spacing: .5px;
+}
+
+// ── Animación de entrada de mensajes ───────────────────────────
+.burbuja-wrap.entra {
+  animation: entraBurbuja .32s cubic-bezier(.2,.8,.3,1.1) both;
+}
+@keyframes entraBurbuja {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+// ── Progreso en la bienvenida ──────────────────────────────────
+.bienvenida-progreso {
+  margin-top: 18px; width: 100%; max-width: 320px;
+
+  .bp-texto {
+    font-size: .82rem; color: #F5C842; font-weight: 600;
+    text-align: center; margin-bottom: 8px; line-height: 1.4;
+  }
+  .bp-barra {
+    height: 9px; border-radius: 6px;
+    background: rgba(255,255,255,.08);
+    overflow: hidden; border: 1px solid rgba(245,200,66,.2);
+  }
+  .bp-fill {
+    height: 100%; border-radius: 6px;
+    background: linear-gradient(90deg, #00A843, #F5C842);
+    box-shadow: 0 0 10px rgba(245,200,66,.5);
+    animation: llenaBarra 1s ease-out both;
+    transition: width .6s ease;
+  }
+}
+@keyframes llenaBarra { from { width: 0 !important; } }
+
+// ── Chip dorado para códigos de lámina dentro del texto ────────
+.md .lam-chip-inline {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(245,200,66,.18), rgba(245,200,66,.08));
+  border: 1px solid rgba(245,200,66,.45);
+  border-radius: 6px; padding: 0 6px;
+  font-weight: 700; font-size: .82rem;
+  color: #FFD971; letter-spacing: .3px;
+  margin: 0 1px;
+}
+
+// ── Chips de sugerencia: transición al cambiar ─────────────────
+.chips-row .chip {
+  animation: entraChip .3s ease both;
+}
+@keyframes entraChip {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  FONDO ANIMADO PREMIUM (decorativo, sutil, no estorba la lectura)
+// ════════════════════════════════════════════════════════════════
+.fondo-anim {
+  position: absolute; inset: 0;
+  overflow: hidden; pointer-events: none;
+  z-index: 0;
+}
+
+// ── Partículas (emojis temáticos) que flotan hacia arriba ──────
+.particula {
+  position: absolute;
+  bottom: -50px;
+  font-size: 26px;
+  opacity: 0;
+  filter: blur(.4px);
+  will-change: transform, opacity;
+  animation: flotarArriba linear infinite;
+}
+@keyframes flotarArriba {
+  0%   { transform: translateY(0) rotate(0deg);      opacity: 0; }
+  10%  { opacity: .14; }
+  50%  { opacity: .18; }
+  90%  { opacity: .10; }
+  100% { transform: translateY(-108vh) rotate(220deg); opacity: 0; }
+}
+
+// Cada partícula con posición, tamaño, duración y retardo distintos
+.p1 { left: 8%;  font-size: 24px; animation-duration: 17s; animation-delay: 0s;   }
+.p2 { left: 24%; font-size: 18px; animation-duration: 22s; animation-delay: 4s;   }
+.p3 { left: 45%; font-size: 30px; animation-duration: 19s; animation-delay: 8s;   }
+.p4 { left: 63%; font-size: 20px; animation-duration: 24s; animation-delay: 2s;   }
+.p5 { left: 78%; font-size: 16px; animation-duration: 16s; animation-delay: 11s;  }
+.p6 { left: 90%; font-size: 22px; animation-duration: 21s; animation-delay: 6s;   }
+
+// ── Orbes de luz que respiran y se desplazan (profundidad) ─────
+.orbe {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: .5;
+  will-change: transform;
+}
+.o1 {
+  width: 240px; height: 240px; top: -40px; left: -60px;
+  background: radial-gradient(circle, rgba(124,92,255,.35), transparent 70%);
+  animation: derivaOrbe1 26s ease-in-out infinite;
+}
+.o2 {
+  width: 200px; height: 200px; top: 40%; right: -50px;
+  background: radial-gradient(circle, rgba(245,200,66,.22), transparent 70%);
+  animation: derivaOrbe2 32s ease-in-out infinite;
+}
+.o3 {
+  width: 280px; height: 280px; bottom: -80px; left: 30%;
+  background: radial-gradient(circle, rgba(21,101,192,.28), transparent 70%);
+  animation: derivaOrbe3 30s ease-in-out infinite;
+}
+@keyframes derivaOrbe1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(40px,30px) scale(1.15); }
+}
+@keyframes derivaOrbe2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(-35px,-25px) scale(1.2); }
+}
+@keyframes derivaOrbe3 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(30px,-40px) scale(1.1); }
+}
+
+// Respeta a quien prefiere menos movimiento (accesibilidad)
+@media (prefers-reduced-motion: reduce) {
+  .particula, .orbe { animation: none; opacity: .08; }
 }

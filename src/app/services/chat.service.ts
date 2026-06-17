@@ -17,6 +17,16 @@ export interface MensajeChat {
   leido?          : boolean;
 }
 
+export interface ResumenColeccion {
+  total_album : number;
+  tiene       : number;
+  faltan      : number;
+  progreso    : number;
+  n_repetidas : number;
+  n_brillantes: number;
+  repetidas_ej: string[];
+}
+
 export interface UsuarioChat {
   id           : number;
   username     : string;
@@ -52,6 +62,7 @@ export class ChatService {
   private propuesta$  = new Subject<any>();
   private respuesta$  = new Subject<any>();
   private leidos$     = new Subject<number>();
+  private reaccion$   = new Subject<{ mensaje_id: number; emoji: string; de_usuario: number }>();
 
   public conexion$            = this.conectado$.asObservable();
   public mensajesP2P$         = this.msgsP2P$.asObservable();
@@ -62,6 +73,7 @@ export class ChatService {
   public nuevaPropuesta$      = this.propuesta$.asObservable();
   public propuestaRespondida$ = this.respuesta$.asObservable();
   public mensajesLeidos$      = this.leidos$.asObservable();
+  public reacciones$          = this.reaccion$.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -75,11 +87,18 @@ export class ChatService {
     this.socket.on('disconnect', () => this.conectado$.next(false));
     this.socket.on('nuevo_mensaje',   (msg: MensajeChat) => this.msgsP2P$.next([...this.msgsP2P$.value, { ...msg, es_mio: false }]));
     this.socket.on('mensaje_enviado', (msg: MensajeChat) => this.msgsP2P$.next([...this.msgsP2P$.value, { ...msg, es_mio: !msg.es_sistema }]));
-    this.socket.on('respuesta_bot',   (msg: any) => this.msgsBot$.next([...this.msgsBot$.value, { contenido: msg.contenido, enviado_en: msg.enviado_en, es_del_bot: true, es_mio: false }]));
+    // ── Streaming del bot ──────────────────────────────────────────────
+    // bot_chunk: cada fragmento de texto que el modelo va generando.
+    this.socket.on('bot_chunk', (d: any) => this.agregarChunkBot(d?.fragmento ?? ''));
+    // bot_fin: respuesta completa + timestamp definitivo; cierra el mensaje.
+    this.socket.on('bot_fin', (d: any) => this.finalizarMensajeBot(d?.contenido ?? '', d?.enviado_en));
+    // respuesta_bot: compatibilidad con el flujo antiguo (no-streaming).
+    this.socket.on('respuesta_bot',   (msg: any) => this.finalizarMensajeBot(msg.contenido, msg.enviado_en));
     this.socket.on('bot_escribiendo',    (d: any) => this.botTyping$.next(!!d?.escribiendo));
     this.socket.on('usuario_estado',      (d: EstadoUsuario) => this.estado$.next(d));
     this.socket.on('usuario_escribiendo', (d: any) => this.userTyping$.next(d));
     this.socket.on('mensajes_leidos',     (d: any) => this.leidos$.next(d?.lector_id));
+    this.socket.on('reaccion',            (d: any) => this.reaccion$.next(d));
     this.socket.on('nueva_propuesta',      (d: any) => this.propuesta$.next(d));
     this.socket.on('propuesta_respondida', (d: any) => this.respuesta$.next(d));
     this.socket.on('connect_error', (err: Error) => console.error('[SOCKET] error:', err.message));
@@ -91,9 +110,81 @@ export class ChatService {
     this.socket?.emit('enviar_mensaje', { destinatario_id: destinatarioId, contenido });
   }
 
+  // Reacciona a un mensaje con un emoji (tiempo real, no se persiste).
+  reaccionar(destinatarioId: number, mensajeId: number, emoji: string): void {
+    this.socket?.emit('reaccionar', { destinatario_id: destinatarioId, mensaje_id: mensajeId, emoji });
+  }
+
   enviarAlBot(contenido: string): void {
     this.msgsBot$.next([...this.msgsBot$.value, { contenido, es_del_bot: false, enviado_en: new Date().toISOString(), es_mio: true }]);
+    this.botStreaming = false;  // se abrirá al llegar el primer chunk
+    this.botGenerando = true;   // bloquea reenvíos hasta que termine
     this.socket?.emit('mensaje_al_bot', { contenido });
+  }
+
+  // Reenvía una pregunta al bot SIN volver a pintar la burbuja del usuario.
+  // Se usa para "regenerar": la pregunta ya está en pantalla.
+  regenerarRespuesta(contenido: string): void {
+    this.botStreaming = false;
+    this.botGenerando = true;
+    this.socket?.emit('mensaje_al_bot', { contenido });
+  }
+
+  // Pide al backend cortar la generación y cierra el mensaje en curso.
+  detenerBot(): void {
+    this.socket?.emit('detener_bot', {});
+    this.botGenerando = false;
+    this.botStreaming = false;
+    this.botTyping$.next(false);
+  }
+
+  // ── Construcción progresiva del mensaje del bot (streaming) ─────────────
+  // Indica si hay un mensaje del bot "abierto" recibiendo fragmentos.
+  private botStreaming = false;
+  // Público: true desde que se envía hasta que el bot termina (para la UI).
+  public botGenerando = false;
+
+  /** Agrega un fragmento al mensaje del bot en curso (lo crea si es el primero). */
+  private agregarChunkBot(fragmento: string): void {
+    if (!fragmento) return;
+    const lista = [...this.msgsBot$.value];
+
+    if (!this.botStreaming) {
+      // Primer fragmento: creamos la burbuja del bot vacía y empezamos a llenarla.
+      lista.push({ contenido: fragmento, es_del_bot: true, es_mio: false, enviado_en: new Date().toISOString() });
+      this.botStreaming = true;
+    } else {
+      // Fragmentos siguientes: concatenamos al último mensaje (el del bot).
+      const ultimo = lista[lista.length - 1];
+      lista[lista.length - 1] = { ...ultimo, contenido: ultimo.contenido + fragmento };
+    }
+    this.msgsBot$.next(lista);
+  }
+
+  /** Cierra el mensaje del bot: fija contenido y timestamp definitivos. */
+  private finalizarMensajeBot(contenido: string, enviadoEn?: string): void {
+    const lista = [...this.msgsBot$.value];
+
+    if (this.botStreaming) {
+      // Reemplazamos el texto acumulado por el definitivo (evita desfases).
+      const ultimo = lista[lista.length - 1];
+      lista[lista.length - 1] = { ...ultimo, contenido, enviado_en: enviadoEn ?? ultimo.enviado_en };
+    } else {
+      // Llegó la respuesta sin haber recibido chunks (modo no-streaming).
+      lista.push({ contenido, es_del_bot: true, es_mio: false, enviado_en: enviadoEn ?? new Date().toISOString() });
+    }
+    this.msgsBot$.next(lista);
+    this.botStreaming = false;
+    this.botGenerando = false;
+  }
+
+  // Quita la última respuesta del bot (para "regenerar": se borra y se vuelve a pedir).
+  quitarUltimaRespuestaBot(): void {
+    const lista = [...this.msgsBot$.value];
+    if (lista.length && lista[lista.length - 1].es_del_bot) {
+      lista.pop();
+      this.msgsBot$.next(lista);
+    }
   }
 
   notificarEscribiendo(destinatarioId: number, escribiendo: boolean): void {
@@ -125,6 +216,11 @@ export class ChatService {
 
   getHistorialBot(): Observable<MensajeChat[]> {
     return this.http.get<MensajeChat[]>(`${environment.apiUrl}/chat/historial-bot`);
+  }
+
+  // Resumen de la colección para la bienvenida y las sugerencias dinámicas.
+  getResumenBot(): Observable<ResumenColeccion> {
+    return this.http.get<ResumenColeccion>(`${environment.apiUrl}/chat/resumen-bot`);
   }
 
   borrarHistorial(destinatarioId: number): Observable<any> {
