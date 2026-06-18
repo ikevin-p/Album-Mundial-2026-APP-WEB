@@ -23,6 +23,14 @@ log.txt
 /platforms
 /plugins
 
+# Android (Capacitor) - builds generados, no versionar
+android/app/build
+android/build
+android/.gradle
+android/local.properties
+android/captures
+*.apk
+
 # Compiled output
 /dist
 /tmp
