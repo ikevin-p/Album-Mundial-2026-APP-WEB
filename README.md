@@ -1,169 +1,171 @@
-# Álbum Mundial 2026 — Documentación Técnica
+# Álbum Mundial 2026 — Backend (FastAPI)
 
 ## Descripción
-Aplicación móvil Android para gestionar la colección de figuritas del álbum Panini FIFA World Cup 2026. Permite a múltiples usuarios registrar qué láminas tienen, cuáles les faltan y cuáles tienen repetidas para cambiar.
+API REST + WebSocket para la app AlbumFIFA: gestión de colección de
+láminas Panini del Mundial 2026, intercambios entre usuarios, chat en
+tiempo real y un chatbot con IA local (Ollama).
+
+El frontend (Ionic/Angular) vive en la rama `master` de este mismo repo,
+como proyecto hermano `albumApp`. Ver su README para el setup conjunto.
 
 ---
 
-## Arquitectura del Sistema
+## Arquitectura
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   App Android                        │
-│         Ionic + Angular + Capacitor                  │
-│                                                      │
-│  Login/Registro → Países → Jugadores → Detalle       │
-└──────────────────────┬──────────────────────────────┘
-                       │ HTTP + JWT Bearer Token
-                       │ (CapacitorHttp / 10.0.2.2:8000)
-┌──────────────────────▼──────────────────────────────┐
-│                 Backend FastAPI                      │
-│                                                      │
-│  POST /auth/login       → JWT Token                  │
-│  POST /auth/register    → Crear usuario              │
-│  GET  /coleccion/       → Láminas + estado usuario   │
-│  PATCH /coleccion/{id}  → Actualizar cantidad        │
-└──────────────────────┬──────────────────────────────┘
-                       │ SQLAlchemy ORM
-┌──────────────────────▼──────────────────────────────┐
-│              Base de Datos SQLite                    │
-│               mundial.db                            │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                      App Android / Web                    │
+│              Ionic + Angular + Capacitor                  │
+└───────────────┬─────────────────────────┬─────────────────┘
+                │ HTTP + JWT Bearer         │ WebSocket (Socket.IO)
+┌───────────────▼─────────────────────────▼─────────────────┐
+│                      Backend FastAPI                       │
+│                                                             │
+│  /auth/*        → login, registro, JWT                     │
+│  /coleccion/*    → CRUD de láminas del usuario               │
+│  /chat/*         → historial, resumen de colección (REST)    │
+│  Socket.IO       → chat P2P, presencia, reacciones, bot      │
+│       │                                                     │
+│       └── chatbot/  → stream a Ollama (llama3.2:3b, local)   │
+└───────────────┬─────────────────────────────────────────────┘
+                │ SQLAlchemy ORM
+┌───────────────▼─────────────────────────────────────────────┐
+│                  Base de Datos SQLite (mundial.db)            │
+└───────────────────────────────────────────────────────────────┘
 ```
-
----
-
-## Modelo de Datos
-
-### Tabla: users
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER PK | Identificador único |
-| username | VARCHAR UNIQUE | Nombre de usuario |
-| nombre_real | VARCHAR | Nombre para mostrar |
-| hashed_password | VARCHAR | Contraseña hasheada (bcrypt) |
-
-### Tabla: laminas (Catálogo global)
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER PK | Identificador único |
-| codigo_lamina | VARCHAR UNIQUE | Código de lámina (ej: ARG-03) |
-| nombre_jugador | VARCHAR | Nombre del jugador o item |
-| pais | VARCHAR | País o categoría |
-| club | VARCHAR | Club actual del jugador |
-| es_lamina_brillante | BOOLEAN | Si es lámina especial |
-
-### Tabla: coleccion (Estado por usuario)
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INTEGER PK | Identificador único |
-| user_id | FK → users.id | Usuario dueño |
-| lamina_id | FK → laminas.id | Lámina referenciada |
-| cantidad | INTEGER | 1=la tiene, 2+=repetidas |
-
-**Restricción**: UNIQUE(user_id, lamina_id) — un usuario no puede tener el mismo registro dos veces.
 
 ---
 
 ## Stack Tecnológico
-
-### Backend
-- **FastAPI** — Framework REST API (Python)
-- **SQLAlchemy** — ORM para manejo de BD
-- **SQLite** — Base de datos local (archivo mundial.db)
-- **JWT (python-jose)** — Autenticación stateless
-- **bcrypt (passlib)** — Hash seguro de contraseñas
-- **Uvicorn** — Servidor ASGI de desarrollo
-
-### Frontend
-- **Ionic Framework** — UI components móviles
-- **Angular 17** — Framework frontend (standalone components)
-- **Capacitor** — Bridge nativo Android
-- **TypeScript** — Tipado estático
+- **FastAPI** — API REST asíncrona, con Swagger automático en `/docs`.
+- **SQLAlchemy** — ORM.
+- **SQLite** — Base de datos local (`mundial.db`).
+- **python-jose + bcrypt (passlib)** — JWT y hash de contraseñas.
+  ⚠️ `bcrypt` debe quedar fijo en `4.0.1` (ver `requirements.txt`) — versiones
+  4.1+ rompen `passlib` (falta `__about__`).
+- **python-socketio** — chat en tiempo real, presencia, reacciones.
+- **Ollama** — motor de IA local para el chatbot. Sin API de pago, sin costo
+  por consulta, datos privados (no sale nada a la nube).
+- **Uvicorn** — servidor ASGI.
 
 ---
 
-## Endpoints de la API
+## Modelo de datos (resumen)
 
-### Autenticación
+| Tabla         | Campos clave                                             |
+|---------------|------------------------------------------------------------|
+| `users`       | id, username, nombre_real, hashed_password                |
+| `laminas`     | id, codigo_lamina (ej: ARG-03), nombre_jugador, pais, club, es_lamina_brillante |
+| `coleccion`   | id, user_id (FK), lamina_id (FK), cantidad — UNIQUE(user_id, lamina_id) |
+| `mensajes`    | id, sala_id (FK), remitente_id, contenido, es_del_bot, enviado_en |
+| `sala_chat` / `sala_participante` | salas de chat P2P y sus participantes        |
 
-| Método | Ruta | Body | Respuesta |
-|--------|------|------|-----------|
-| POST | /auth/login | `username`, `password` (form) | `{ access_token, token_type }` |
-| POST | /auth/register | `{ username, nombre_real, password }` | `{ id, username, nombre_real }` |
+`cantidad=0` en `coleccion` elimina el registro; `cantidad>=1` la marca como
+poseída; `cantidad>1` indica repetidas disponibles para intercambio.
+
+---
+
+## Setup
+
+### 1. Variables de entorno
+Copia `.env.example` a `.env` y completa los valores:
+```powershell
+cp .env.example .env
+```
+Genera una `SECRET_KEY` propia:
+```powershell
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+### 2. Entorno virtual y dependencias
+```powershell
+python -m venv venv
+venv\Scripts\pip install -r requirements.txt
+```
+
+### 3. Ollama (motor del chatbot)
+```powershell
+ollama pull llama3.2:3b
+ollama serve
+```
+Si usas otro modelo, ajusta `OLLAMA_MODEL` en `.env`.
+
+### 4. Levantar el servidor
+```powershell
+venv\Scripts\python.exe -m uvicorn app.main:socket_app --host 0.0.0.0 --port 8001 --reload
+```
+Swagger: `http://localhost:8001/docs`
+
+⚠️ El puerto **8000 puede estar bloqueado por `svchost` en Windows** — este
+proyecto usa el **8001** para evitarlo. Si cambias el puerto, abre el
+firewall (PowerShell como administrador):
+```powershell
+netsh advfirewall firewall add rule name="AlbumFIFA Backend" dir=in action=allow protocol=TCP localport=8001
+```
+
+### Arranque automático (recomendado)
+El frontend (`albumApp/arranque.ps1`) levanta backend + frontend + verifica
+Ollama de un solo paso, detectando la IP de red automáticamente. Ver su
+README para más detalle.
+
+---
+
+## Endpoints principales
+
+### Auth
+| Método | Ruta            | Body                                    | Respuesta |
+|--------|-----------------|------------------------------------------|-----------|
+| POST   | /auth/login     | `username`, `password` (form)             | `{ access_token, token_type }` |
+| POST   | /auth/register  | `{ username, nombre_real, password }`     | `{ id, username, nombre_real }` |
 
 ### Colección (requieren JWT Bearer)
+| Método | Ruta              | Body              | Respuesta |
+|--------|-------------------|---------------------|-----------|
+| GET    | /coleccion/       | —                   | Láminas + estado del usuario |
+| PATCH  | /coleccion/{id}   | `{ cantidad: 0-10 }` | Lámina actualizada |
 
-| Método | Ruta | Body | Respuesta |
-|--------|------|------|-----------|
-| GET | /coleccion/ | — | Lista de láminas con estado del usuario |
-| PATCH | /coleccion/{id} | `{ cantidad: 0-10 }` | Lámina actualizada |
+### Chat (requieren JWT Bearer)
+| Método | Ruta                  | Respuesta |
+|--------|------------------------|-----------|
+| GET    | /chat/historial-bot    | Historial de mensajes con el chatbot |
+| DELETE | /chat/historial-bot    | Borra el historial del chatbot |
+| GET    | /chat/resumen-bot      | Progreso, faltantes, repetidas y brillantes del usuario (alimenta la bienvenida y sugerencias del bot) |
+| GET    | /chat/historial/{id}   | Historial de chat P2P con otro usuario |
 
-**Nota**: `cantidad=0` elimina la lámina de la colección, `cantidad>=1` la marca como poseída.
+### Eventos Socket.IO
+| Evento (cliente → servidor) | Evento (servidor → cliente) | Uso |
+|------------------------------|--------------------------------|------|
+| `mensaje_al_bot`             | `bot_chunk`, `bot_fin`         | Chat con Panini Pal (streaming) |
+| `detener_bot`                | —                                | Cancela la generación en curso |
+| `enviar_mensaje`             | `nuevo_mensaje`, `mensaje_enviado` | Chat P2P |
+| `reaccionar`                 | `reaccion`                      | Reacción emoji a un mensaje (tiempo real, no persiste) |
+| `marcar_leidos`               | `mensajes_leidos`               | Confirmación de lectura |
 
 ---
 
-## Cómo Levantar el Proyecto
+## El chatbot "Panini Pal"
 
-### Requisitos
-- Python 3.12
-- Node.js 18+
-- Android Studio con emulador API 35+
+- Corre sobre `llama3.2:3b` vía Ollama, en streaming (token por token).
+- Recibe en su contexto un resumen real de la colección del usuario
+  (progreso, faltantes, repetidas, brillantes) — ver `app/routers/chat/contexto.py`.
+- Si necesitas más calidad y menos velocidad, cambia `OLLAMA_MODEL=llama3.1:8b`
+  en `.env` (ya viene más lento en CPU, pero sigue el contexto mejor).
 
-### Backend
-```powershell
-cd C:\proyectos\album-mundial\backend
-venv\Scripts\Activate.ps1
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+---
+
+## Credenciales de demo
 ```
-Swagger disponible en: `http://localhost:8000/docs`
-
-### Frontend (desarrollo en navegador)
-```powershell
-cd C:\proyectos\albumApp
-ionic serve
+usuario: admin
+clave  : admin123
 ```
 
-### Frontend (Android)
-```powershell
-ionic build
-ionic capacitor sync android
-# Luego Run 'app' en Android Studio
-```
-
-**Nota importante**: Para Android, Capacitor usa `environment.prod.ts`. La URL del backend debe ser `http://10.0.2.2:8000` (alias del localhost desde el emulador).
-
----
-
-## Funcionalidades
-
-### Usuario
-- Registro con nombre real y nombre de usuario
-- Login con JWT (expira en 24h según configuración)
-- Colección independiente por usuario
-
-### Álbum
-- **653 láminas** del catálogo oficial Mundial 2026
-- **48 selecciones** + categoría Especiales
-- 13 láminas por selección: Escudo + Estadio + 11 jugadores representativos
-- **29 láminas especiales**: Trofeo, Legends, Future Stars, Capitanes, etc.
-
-### Interacción
-- Tocar lámina → marcar como poseída
-- Tocar de nuevo → sumar repetida (máx. 10)
-- Mantener presionado → quitar del álbum
-- Filtros por confederación (CONCACAF/CONMEBOL/UEFA/CAF/AFC/OFC)
-- Buscador de selecciones
-- Ordenar por: zona / más completo / A-Z / para cambiar
-- Estadísticas: tengo / me faltan / para cambiar / % completado
-
----
-
-## Credenciales de Demo
-- Usuario: `admin`
-- Contraseña: `admin123`
-
----
+## Notas para el futuro
+- Si la verificación de Ollama en `arranque.ps1` reporta "falta el modelo"
+  aunque sí esté instalado, revisa que el script use `@(...)` al contar
+  resultados de `Where-Object` en PowerShell — sin eso, `.Count` puede
+  evaluar como vacío en vez de `0` y dar falsos negativos.
+- El frontend (Capacitor) compila la IP del backend **dentro del APK**. Cada
+  vez que cambie la red, hay que recompilar el APK (ver README del frontend).
 
 ## Autor
-Proyecto académico — Ingeniería en Informática, DuocUC
+Proyecto académico — Ingeniería en Informática, Duoc UC.
